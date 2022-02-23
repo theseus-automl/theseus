@@ -3,12 +3,17 @@ from random import randint
 
 from transformers import pipeline
 
+from theseus.validators import Integer
+
 
 class GPTAugmenterShortInputWarning(Warning):
     pass
 
 
 class GPTAugmenter:
+    _min_input_len = Integer(min_value=5)
+    _max_sequences = Integer(min_value=1)
+
     def __init__(
         self,
         min_input_len: int = 5,
@@ -30,11 +35,11 @@ class GPTAugmenter:
 
         if input_length < self._min_input_len:
             warnings.warn(
-                '',
+                'Input is too short. Results may be inaccurate',
                 GPTAugmenterShortInputWarning,
             )
 
-        num_new_words = randint(1, input_length)
+        num_new_words = randint(input_length // 2, input_length)
         output = self._generator(
             text,
             max_length=input_length + num_new_words,
