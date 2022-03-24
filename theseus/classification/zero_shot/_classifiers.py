@@ -25,6 +25,7 @@ class ZeroShotClassifier:
         self._model = pipeline(
             'zero-shot-classification',
             model=model_name,
+            framework='pt',
         )
         self._candidate_labels = candidate_labels
 
