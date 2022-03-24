@@ -4,10 +4,10 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
 
-from theseus.dataset.balancing.sampler_mixin import SamplerMixin
+from theseus.dataset.balancing._common import prepare
 
 
-class SimilarityUnderSampler(SamplerMixin):
+class SimilarityUnderSampler:
     def __init__(
         self,
         model_name_or_path: str,
@@ -22,7 +22,7 @@ class SimilarityUnderSampler(SamplerMixin):
         *args,
         **kwargs,
     ) -> pd.DataFrame:
-        df, counts, target_samples = super().__call__(
+        df, counts, target_samples = prepare(
             texts,
             labels,
             'under',

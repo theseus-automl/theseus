@@ -1,14 +1,13 @@
 import numpy as np
 import pandas as pd
 
-from theseus.dataset.balancing.sampler_mixin import SamplerMixin
+from theseus.dataset.balancing._common import prepare
 
 
-class RandomOverSampler(SamplerMixin):
+class RandomOverSampler:
     def __init__(
         self,
     ) -> None:
-        # TODO: random state for reproducibility
         pass
 
     def __call__(
@@ -18,7 +17,7 @@ class RandomOverSampler(SamplerMixin):
         *args,
         **kwargs,
     ) -> pd.DataFrame:
-        df, counts, target_samples = super().__call__(
+        df, counts, target_samples = prepare(
             texts,
             labels,
             'under',
