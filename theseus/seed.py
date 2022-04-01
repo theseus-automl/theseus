@@ -1,5 +1,8 @@
 import random
-from typing import Optional
+from typing import (
+    NoReturn,
+    Optional,
+)
 
 import numpy as np
 import torch
@@ -7,7 +10,7 @@ import torch
 
 def seed_everything(
     seed: Optional[int],
-) -> None:
+) -> NoReturn:
     if seed is None:
         max_seed_value = np.iinfo(np.uint32).max
         min_seed_value = np.iinfo(np.uint32).min

@@ -1,11 +1,14 @@
 from contextlib import contextmanager
-from typing import Type
+from typing import (
+    NoReturn,
+    Type,
+)
 
 
 @contextmanager
 def not_raises(
     expected_exception: Type[Exception],
-) -> None:
+) -> NoReturn:
     try:
         yield
     except expected_exception as error:
