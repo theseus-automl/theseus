@@ -1,3 +1,5 @@
+from typing import NoReturn
+
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,

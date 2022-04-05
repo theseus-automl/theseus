@@ -1,5 +1,6 @@
 import warnings
 from random import randint
+from typing import NoReturn
 
 from transformers import pipeline
 
