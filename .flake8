@@ -1,0 +1,20 @@
+[flake8]
+max-raises = 4
+max-imports = 14
+max-line-length = 120
+max-local-variables = 8
+max-expressions = 12
+max-arguments = 8
+
+ignore = WPS202, WPS226, WPS237,
+    WPS305, WPS306,
+    WPS410, WPS412, WPS436, WPS440, WPS450,
+    WPS529,
+    WPS602, WPS605,
+    D100, D101, D102, D103, D104, D105, D107,
+    S310,
+
+per-file-ignores =
+    tests/*: S101, S301, S403, W291, WPS118, WPS437, WPS442
+
+format = ${cyan}%(path)s${reset}:${yellow_bold}%(row)d${reset}:${green_bold}%(col)d${reset}: ${red_bold}%(code)s${reset} %(text)s
