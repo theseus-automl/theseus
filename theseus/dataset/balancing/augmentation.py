@@ -2,11 +2,11 @@ from typing import NoReturn
 
 import pandas as pd
 
-from theseus.dataset.balancing._sampler import _prepare
-from theseus.dataset.augmentations.gpt import GPTAugmenter
 from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
+from theseus.dataset.augmentations.gpt import GPTAugmenter
 from theseus.dataset.augmentations.random_insertion import RandomInsertionAugmenter
 from theseus.dataset.augmentations.random_replacement import RandomReplacementAugmenter
+from theseus.dataset.balancing._sampler import _prepare
 
 
 class AugmentationOverSampler:
