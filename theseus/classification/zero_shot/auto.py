@@ -69,9 +69,9 @@ class AutoZeroShotClassifier:
         df['texts'] = texts
         df['labels'] = [model(text) for text in texts]
 
-        df.to_csv(
-            out_path / 'predictions.csv',
-            sep='\t',  # TODO: config csv separator
+        df.to_parquet(
+            out_path / 'predictions.parquet.gzip',
+            compression='gzip',
         )
 
         plot_class_distribution(
