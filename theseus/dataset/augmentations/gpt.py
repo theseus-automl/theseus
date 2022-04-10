@@ -1,5 +1,6 @@
 import warnings
 from random import randint
+from typing import NoReturn
 
 from transformers import pipeline
 
@@ -18,7 +19,7 @@ class GPTAugmenter:
         self,
         min_input_len: int = 5,
         max_sequences: int = 10,
-    ) -> None:
+    ) -> NoReturn:
         self._min_input_len = min_input_len
         self._max_sequences = max_sequences
 

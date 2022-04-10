@@ -1,3 +1,5 @@
+from typing import NoReturn
+
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
@@ -8,7 +10,7 @@ from transformers import (
 class BackTranslationAugmenter:
     def __init__(
         self,
-    ) -> None:
+    ) -> NoReturn:
         self._translator_en_to_de = pipeline(
             'translation_en_to_de',
             model='t5-base',
