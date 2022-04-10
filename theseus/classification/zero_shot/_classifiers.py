@@ -1,17 +1,16 @@
 from typing import (
     List,
-    NoReturn,
     Union,
 )
 
 import numpy as np
 from transformers import pipeline
 
-from theseus._const import LanguageCode
+from theseus.lang_code import LanguageCode
 
 
 _MONOLINGUAL_MODELS = {
-    LanguageCode.english: 'facebook/bart-large-mnli',
+    LanguageCode.ENGLISH: 'facebook/bart-large-mnli',
 }
 
 
@@ -20,7 +19,7 @@ class ZeroShotClassifier:
         self,
         model_name: str,
         candidate_labels: List[str],
-    ) -> NoReturn:
+    ) -> None:
         self._model_name = model_name
         self._model = pipeline(
             'zero-shot-classification',
@@ -51,7 +50,7 @@ class MultilingualZeroShotClassifier(ZeroShotClassifier):
     def __init__(
         self,
         candidate_labels: List[str],
-    ) -> NoReturn:
+    ) -> None:
         super().__init__(
             'joeddav/xlm-roberta-large-xnli',
             candidate_labels,
@@ -61,9 +60,9 @@ class MultilingualZeroShotClassifier(ZeroShotClassifier):
 class MonolingualZeroShotClassifier(ZeroShotClassifier):
     def __init__(
         self,
-        lang_code: str,
+        lang_code: LanguageCode,
         candidate_labels: List[str],
-    ) -> NoReturn:
+    ) -> None:
         if lang_code not in LanguageCode:
             raise ValueError(f'unknown language code {lang_code}')
 
