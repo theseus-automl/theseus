@@ -1,12 +1,15 @@
+import gc
 from typing import NoReturn
 
 import pandas as pd
+import torch
 
 from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
 from theseus.dataset.augmentations.gpt import GPTAugmenter
 from theseus.dataset.augmentations.random_insertion import RandomInsertionAugmenter
 from theseus.dataset.augmentations.random_replacement import RandomReplacementAugmenter
 from theseus.dataset.balancing._sampler import _prepare
+from theseus.utils import chunkify
 
 
 class AugmentationOverSampler:
@@ -36,8 +39,15 @@ class AugmentationOverSampler:
                 )['texts'].tolist()
                 augmented = []
 
-                for idx, text in enumerate(base):
-                    augmented.append(self._augmenters[idx % len(self._augmenters)](text))
+                for model_cls, chunk in zip(self._augmenters, chunkify(base, len(self._augmenters))):
+                    model = model_cls()
+
+                    for text in chunk:
+                        augmented.append(model(text))
+
+                    del model
+                    gc.collect()
+                    torch.cuda.empty_cache()
 
                 df = pd.concat(
                     [
@@ -57,11 +67,11 @@ class AugmentationOverSampler:
     ) -> None:
         if self._target_lang == 'en':
             self._augmenters = [
-                GPTAugmenter(),
-                BackTranslationAugmenter(),
+                GPTAugmenter,
+                BackTranslationAugmenter,
             ]
         else:
             self._augmenters = [
-                RandomInsertionAugmenter(),
-                RandomReplacementAugmenter(),
+                RandomInsertionAugmenter,
+                RandomReplacementAugmenter,
             ]
