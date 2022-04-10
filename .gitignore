@@ -1,12 +1,3 @@
-# PyCharm
-.idea/
-
-# MacOS
-.DS_store
-
-# Jupyter
-*.ipynb
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
