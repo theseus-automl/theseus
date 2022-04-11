@@ -10,7 +10,7 @@ from fasttext import (
     load_model,
 )
 
-from theseus._exceptions import ModelNotFoundError
+from theseus.exceptions import ModelNotFoundError
 
 _FT_THRESHOLD = 0.0
 
