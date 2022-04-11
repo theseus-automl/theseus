@@ -2,6 +2,7 @@ from abc import (
     ABC,
     abstractmethod,
 )
+from types import MappingProxyType
 from typing import (
     List,
     NoReturn,
@@ -15,22 +16,86 @@ from transformers import (
     AutoTokenizer,
 )
 
+from theseus.exceptions import UnsupportedLanguageError
+from theseus.lang_code import LanguageCode
 from theseus.dataset.balancing._sampler import (
     _prepare,
     _Sampler,
 )
 
 
+SIMILARITY_MODELS = MappingProxyType(
+    {
+        # Mono-language models
+        LanguageCode.ENGLISH: 'sentence-transformers/all-mpnet-base-v2',
+
+        # Multilanguage models
+        LanguageCode.ARABIC: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.BULGARIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.CATALAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.CZECH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.DANISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.GERMAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.GREEK: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.SPANISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.ESTONIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.PERSIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.FINNISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.FRENCH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.GALICIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.GUJARATI: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.HEBREW: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.HINDI: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.CROATIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.HUNGARIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.ARMENIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.INDONESIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.ITALIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.JAPANESE: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.GEORGIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.KOREAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.KURDISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.LITHUANIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.LATVIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.MACEDONIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.MONGOLIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.MARATHI: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.MALAY: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.BURMESE: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.NORWEGIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.DUTCH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.POLISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.PORTUGUESE: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.ROMANIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.RUSSIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.SLOVAK: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.SLOVENIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.ALBANIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.SERBIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.SWEDISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.THAI: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.TURKISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.UKRAINIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.URDU: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.VIETNAMESE: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.CHINESE: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+    },
+)
+
+
 class _SimilaritySampler(_Sampler, ABC):
     def __init__(
         self,
-        model_name_or_path: str,
+        target_lang: LanguageCode,
         strategy: str,
-    ) -> NoReturn:
+    ) -> None:
         super().__init__(strategy)
-        
-        self._tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
-        self._model = AutoModel.from_pretrained(model_name_or_path)
+
+        if target_lang not in SIMILARITY_MODELS:
+            raise UnsupportedLanguageError(f'sentence similarity is not available for language {target_lang}')
+
+        self._tokenizer = AutoTokenizer.from_pretrained(SIMILARITY_MODELS[target_lang])
+        self._model = AutoModel.from_pretrained(SIMILARITY_MODELS[target_lang])
 
     def __call__(
         self,
@@ -129,10 +194,10 @@ class _SimilaritySampler(_Sampler, ABC):
 class SimilarityUnderSampler(_SimilaritySampler):
     def __init__(
         self,
-        model_name_or_path: str,
+        target_lang: LanguageCode,
     ) -> NoReturn:
         super().__init__(
-            model_name_or_path,
+            target_lang,
             'under',
         )
 
@@ -158,10 +223,10 @@ class SimilarityUnderSampler(_SimilaritySampler):
 class SimilarityOverSampler(_SimilaritySampler):
     def __init__(
         self,
-        model_name_or_path: str,
+        target_lang: LanguageCode,
     ) -> NoReturn:
         super().__init__(
-            model_name_or_path,
+            target_lang,
             'over',
         )
 
