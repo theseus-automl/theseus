@@ -1,6 +1,6 @@
 from typing import (
-    Generator,
     Collection,
+    Generator,
 )
 
 import numpy as np

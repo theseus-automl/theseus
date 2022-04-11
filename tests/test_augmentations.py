@@ -2,7 +2,7 @@ from typing import NoReturn
 
 import pytest
 
-from theseus.dataset.augmentations.gpt import (
+from theseus.dataset.augmentations.generation import (
     GPTAugmenter,
     GPTAugmenterShortInputWarning,
 )

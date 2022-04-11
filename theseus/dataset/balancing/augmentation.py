@@ -5,7 +5,7 @@ import pandas as pd
 import torch
 
 from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
-from theseus.dataset.augmentations.gpt import GPTAugmenter
+from theseus.dataset.augmentations.generation import GPTAugmenter
 from theseus.dataset.augmentations.random_insertion import RandomInsertionAugmenter
 from theseus.dataset.augmentations.random_replacement import RandomReplacementAugmenter
 from theseus.dataset.balancing._sampler import _prepare

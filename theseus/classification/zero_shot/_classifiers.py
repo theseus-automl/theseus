@@ -8,7 +8,6 @@ from transformers import pipeline
 
 from theseus.lang_code import LanguageCode
 
-
 _MONOLINGUAL_MODELS = {
     LanguageCode.ENGLISH: 'facebook/bart-large-mnli',
 }
