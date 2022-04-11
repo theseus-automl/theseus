@@ -75,7 +75,7 @@ class GPTAugmenter:
         self._max_sequences = max_sequences
 
         if target_lang not in GENERATION_MODELS:
-            raise UnsupportedLanguageError()
+            raise UnsupportedLanguageError(f'generation model not found for {target_lang} language')
 
         self._generator = pipeline(
             'text-generation',
