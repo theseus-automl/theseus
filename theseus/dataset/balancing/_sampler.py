@@ -7,12 +7,8 @@ from typing import (
 
 import pandas as pd
 
+from theseus.dataset._const import _STRATEGIES
 from theseus.validators.one_of import OneOf
-
-_STRATEGIES = {
-    'under': min,
-    'over': max,
-}
 
 
 def _prepare(
