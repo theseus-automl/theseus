@@ -6,7 +6,7 @@ from typing import (
 
 import pandas as pd
 
-from theseus.classification.zero_shot._classifiers import (
+from theseus.zero_shot._classifiers import (
     MonolingualZeroShotClassifier,
     MultilingualZeroShotClassifier,
     ZeroShotClassifier,
