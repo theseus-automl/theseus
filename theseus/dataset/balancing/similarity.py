@@ -22,63 +22,64 @@ from theseus.dataset.balancing._sampler import (
     _prepare,
     _Sampler,
 )
+from theseus.dataset.text_dataset import TextDataset
 
-
+_MULTILANG_MODEL = 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
 SIMILARITY_MODELS = MappingProxyType(
     {
         # Mono-language models
         LanguageCode.ENGLISH: 'sentence-transformers/all-mpnet-base-v2',
 
         # Multilanguage models
-        LanguageCode.ARABIC: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.BULGARIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.CATALAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.CZECH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.DANISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.GERMAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.GREEK: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.SPANISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.ESTONIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.PERSIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.FINNISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.FRENCH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.GALICIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.GUJARATI: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.HEBREW: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.HINDI: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.CROATIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.HUNGARIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.ARMENIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.INDONESIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.ITALIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.JAPANESE: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.GEORGIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.KOREAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.KURDISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.LITHUANIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.LATVIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.MACEDONIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.MONGOLIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.MARATHI: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.MALAY: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.BURMESE: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.NORWEGIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.DUTCH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.POLISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.PORTUGUESE: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.ROMANIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.RUSSIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.SLOVAK: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.SLOVENIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.ALBANIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.SERBIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.SWEDISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.THAI: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.TURKISH: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.UKRAINIAN: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.URDU: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.VIETNAMESE: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-        LanguageCode.CHINESE: 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+        LanguageCode.ARABIC: _MULTILANG_MODEL,
+        LanguageCode.BULGARIAN: _MULTILANG_MODEL,
+        LanguageCode.CATALAN: _MULTILANG_MODEL,
+        LanguageCode.CZECH: _MULTILANG_MODEL,
+        LanguageCode.DANISH: _MULTILANG_MODEL,
+        LanguageCode.GERMAN: _MULTILANG_MODEL,
+        LanguageCode.GREEK: _MULTILANG_MODEL,
+        LanguageCode.SPANISH: _MULTILANG_MODEL,
+        LanguageCode.ESTONIAN: _MULTILANG_MODEL,
+        LanguageCode.PERSIAN: _MULTILANG_MODEL,
+        LanguageCode.FINNISH: _MULTILANG_MODEL,
+        LanguageCode.FRENCH: _MULTILANG_MODEL,
+        LanguageCode.GALICIAN: _MULTILANG_MODEL,
+        LanguageCode.GUJARATI: _MULTILANG_MODEL,
+        LanguageCode.HEBREW: _MULTILANG_MODEL,
+        LanguageCode.HINDI: _MULTILANG_MODEL,
+        LanguageCode.CROATIAN: _MULTILANG_MODEL,
+        LanguageCode.HUNGARIAN: _MULTILANG_MODEL,
+        LanguageCode.ARMENIAN: _MULTILANG_MODEL,
+        LanguageCode.INDONESIAN: _MULTILANG_MODEL,
+        LanguageCode.ITALIAN: _MULTILANG_MODEL,
+        LanguageCode.JAPANESE: _MULTILANG_MODEL,
+        LanguageCode.GEORGIAN: _MULTILANG_MODEL,
+        LanguageCode.KOREAN: _MULTILANG_MODEL,
+        LanguageCode.KURDISH: _MULTILANG_MODEL,
+        LanguageCode.LITHUANIAN: _MULTILANG_MODEL,
+        LanguageCode.LATVIAN: _MULTILANG_MODEL,
+        LanguageCode.MACEDONIAN: _MULTILANG_MODEL,
+        LanguageCode.MONGOLIAN: _MULTILANG_MODEL,
+        LanguageCode.MARATHI: _MULTILANG_MODEL,
+        LanguageCode.MALAY: _MULTILANG_MODEL,
+        LanguageCode.BURMESE: _MULTILANG_MODEL,
+        LanguageCode.NORWEGIAN: _MULTILANG_MODEL,
+        LanguageCode.DUTCH: _MULTILANG_MODEL,
+        LanguageCode.POLISH: _MULTILANG_MODEL,
+        LanguageCode.PORTUGUESE: _MULTILANG_MODEL,
+        LanguageCode.ROMANIAN: _MULTILANG_MODEL,
+        LanguageCode.RUSSIAN: _MULTILANG_MODEL,
+        LanguageCode.SLOVAK: _MULTILANG_MODEL,
+        LanguageCode.SLOVENIAN: _MULTILANG_MODEL,
+        LanguageCode.ALBANIAN: _MULTILANG_MODEL,
+        LanguageCode.SERBIAN: _MULTILANG_MODEL,
+        LanguageCode.SWEDISH: _MULTILANG_MODEL,
+        LanguageCode.THAI: _MULTILANG_MODEL,
+        LanguageCode.TURKISH: _MULTILANG_MODEL,
+        LanguageCode.UKRAINIAN: _MULTILANG_MODEL,
+        LanguageCode.URDU: _MULTILANG_MODEL,
+        LanguageCode.VIETNAMESE: _MULTILANG_MODEL,
+        LanguageCode.CHINESE: _MULTILANG_MODEL,
     },
 )
 
@@ -99,12 +100,11 @@ class _SimilaritySampler(_Sampler, ABC):
 
     def __call__(
         self,
-        texts: pd.Series,
-        labels: pd.Series,
-    ) -> pd.DataFrame:
+        dataset: TextDataset,
+    ) -> TextDataset:
         df, counts, target_samples = _prepare(
-            texts,
-            labels,
+            dataset.texts,
+            dataset.labels,
             self._strategy,
         )
 
@@ -121,7 +121,10 @@ class _SimilaritySampler(_Sampler, ABC):
                     abs(n_samples - target_samples),
                 )
 
-        return df
+        return TextDataset(
+            df['texts'].tolist(),
+            df['labels'].tolist(),
+        )
 
     @staticmethod
     @abstractmethod

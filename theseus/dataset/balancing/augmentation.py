@@ -9,6 +9,7 @@ from theseus.dataset.augmentations.generation import GPTAugmenter
 from theseus.dataset.augmentations.random_insertion import RandomInsertionAugmenter
 from theseus.dataset.augmentations.random_replacement import RandomReplacementAugmenter
 from theseus.dataset.balancing._sampler import _prepare
+from theseus.dataset.text_dataset import TextDataset
 from theseus.utils import chunkify
 
 
@@ -22,12 +23,11 @@ class AugmentationOverSampler:
 
     def __call__(
         self,
-        texts: pd.Series,
-        labels: pd.Series,
-    ) -> pd.DataFrame:
+        dataset: TextDataset,
+    ) -> TextDataset:
         df, counts, target_samples = _prepare(
-            texts,
-            labels,
+            dataset.texts,
+            dataset.labels,
             'over',
         )
 
@@ -60,7 +60,10 @@ class AugmentationOverSampler:
                     ignore_index=True,
                 )
 
-        return df
+        return TextDataset(
+            df['texts'],
+            df['labels'],
+        )
 
     def _select_augmenters(
         self,

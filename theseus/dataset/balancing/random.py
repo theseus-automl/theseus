@@ -11,17 +11,17 @@ from theseus.dataset.balancing._sampler import (
     _prepare,
     _Sampler,
 )
+from theseus.dataset.text_dataset import TextDataset
 
 
 class _RandomSampler(_Sampler, ABC):
     def __call__(
         self,
-        texts: pd.Series,
-        labels: pd.Series,
-    ) -> pd.DataFrame:
+        dataset: TextDataset,
+    ) -> TextDataset:
         df, counts, target_samples = _prepare(
-            texts,
-            labels,
+            dataset.texts,
+            dataset.labels,
             self._strategy,
         )
 
@@ -33,7 +33,10 @@ class _RandomSampler(_Sampler, ABC):
                     label,
                 )
 
-        return df
+        return TextDataset(
+            df['texts'],
+            df['labels'],
+        )
 
     @staticmethod
     @abstractmethod
