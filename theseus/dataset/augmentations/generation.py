@@ -5,8 +5,8 @@ from types import MappingProxyType
 from transformers import pipeline
 
 from theseus.exceptions import UnsupportedLanguageError
-from theseus.validators import Integer
 from theseus.lang_code import LanguageCode
+from theseus.validators import Integer
 
 GENERATION_MODELS = MappingProxyType(
     {

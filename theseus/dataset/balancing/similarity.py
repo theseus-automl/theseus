@@ -16,13 +16,13 @@ from transformers import (
     AutoTokenizer,
 )
 
-from theseus.exceptions import UnsupportedLanguageError
-from theseus.lang_code import LanguageCode
 from theseus.dataset.balancing._sampler import (
     _prepare,
     _Sampler,
 )
 from theseus.dataset.text_dataset import TextDataset
+from theseus.exceptions import UnsupportedLanguageError
+from theseus.lang_code import LanguageCode
 
 _MULTILANG_MODEL = 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
 SIMILARITY_MODELS = MappingProxyType(
