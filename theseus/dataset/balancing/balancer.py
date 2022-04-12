@@ -1,5 +1,8 @@
 from copy import deepcopy
 
+import numpy as np
+from sklearn.utils.class_weight import compute_class_weight
+
 from theseus.dataset.balancing.augmentation import AugmentationOverSampler
 from theseus.dataset.balancing.checkers import (
     check_balance,
@@ -13,6 +16,7 @@ from theseus.dataset.balancing.similarity import (
     SimilarityOverSampler,
     SimilarityUnderSampler,
 )
+from theseus.dataset.balancing.types import SamplerType
 from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
@@ -27,11 +31,9 @@ class DatasetBalancer:
         self,
         target_lang: LanguageCode,
         ignore_imbalance: bool = False,
-        copy: bool = True,
     ) -> None:
         self._target_lang = target_lang
         self._ignore_imbalance = ignore_imbalance
-        self._copy = copy
 
     def __call__(
         self,
@@ -39,9 +41,6 @@ class DatasetBalancer:
     ) -> TextDataset:
         if dataset.labels is None:
             raise ValueError('unable to balance dataset without labels')
-
-        if self._copy:
-            dataset = deepcopy(dataset)
 
         is_balanced = check_balance(
             dataset.texts,
@@ -51,16 +50,29 @@ class DatasetBalancer:
         if is_balanced:
             # todo: logging
             print('')
+            return dataset
+
+        if self._ignore_imbalance:
+            # todo: logging
+            print('')
+
+            return dataset
+
+        under_dev, over_dev = get_abs_deviation(dataset)
+        sampler = self._choose_sampler(
+            under_dev,
+            over_dev,
+        )
+
+        if sampler is None:
+            dataset = deepcopy(dataset)
+            dataset.class_weights = compute_class_weight(
+                class_weight='balanced',
+                classes=np.unique(dataset.labels),
+                y=dataset.labels,
+            )
         else:
-            if self._ignore_imbalance:
-                # todo: logging
-                print('')
-            else:
-                under_dev, over_dev = get_abs_deviation(dataset)
-                sampler = self._choose_sampler(
-                    under_dev,
-                    over_dev,
-                )
+            dataset = sampler(dataset)
 
         return dataset
 
@@ -68,7 +80,7 @@ class DatasetBalancer:
         self,
         under_dev: float,
         over_dev: float,
-    ):
+    ) -> SamplerType:
         sampler_cls = None
 
         if under_dev <= _RANDOM_THRESHOLD:
@@ -86,9 +98,8 @@ class DatasetBalancer:
         if over_dev <= _AUGMENTATIONS_THRESHOLD:
             sampler_cls = AugmentationOverSampler
 
-        try:
-            return sampler_cls(self._target_lang)
-        except UnsupportedLanguageError:
-            print('')  # TODO: logging
-
-        return None
+        if sampler_cls is not None:
+            try:
+                return sampler_cls(self._target_lang)
+            except UnsupportedLanguageError:
+                print('')  # TODO: logging
