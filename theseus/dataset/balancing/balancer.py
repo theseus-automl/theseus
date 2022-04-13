@@ -20,10 +20,13 @@ from theseus.dataset.balancing.types import SamplerType
 from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
+from theseus.log import setup_logger
 
 _RANDOM_THRESHOLD = 0.05
 _SIMILARITY_THRESHOLD = 0.1
 _AUGMENTATIONS_THRESHOLD = 0.5
+
+_logger = setup_logger(__name__)
 
 
 class DatasetBalancer:
@@ -48,13 +51,12 @@ class DatasetBalancer:
         )
 
         if is_balanced:
-            # todo: logging
-            print('')
+            _logger.warning('dataset is already balanced. Performing no actions')
+
             return dataset
 
         if self._ignore_imbalance:
-            # todo: logging
-            print('')
+            _logger.warning('dataset is imbalanced, but param ignore_imbalance was set to True. Performing no actions')
 
             return dataset
 
@@ -102,4 +104,7 @@ class DatasetBalancer:
             try:
                 return sampler_cls(self._target_lang)
             except UnsupportedLanguageError:
-                print('')  # TODO: logging
+                _logger.error(
+                    f'sampler {sampler_cls} is not available for language {self._target_lang}, '
+                    f'so the class weight will be used',
+                )

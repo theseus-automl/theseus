@@ -6,13 +6,13 @@ from typing import (
 
 import pandas as pd
 
+from theseus.plotting.classification import plot_class_distribution
+from theseus.validators import ExistingDir
 from theseus.zero_shot._classifiers import (
     MonolingualZeroShotClassifier,
     MultilingualZeroShotClassifier,
     ZeroShotClassifier,
 )
-from theseus.plotting.classification import plot_class_distribution
-from theseus.validators import ExistingDir
 
 
 class AutoZeroShotClassifier:

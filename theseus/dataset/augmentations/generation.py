@@ -8,8 +8,7 @@ from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.validators import Integer
 
-GENERATION_MODELS = MappingProxyType(
-    {
+GENERATION_MODELS = MappingProxyType({
         LanguageCode.ENGLISH: 'distilgpt2',
         LanguageCode.SPANISH: 'DeepESP/gpt2-spanish',
         LanguageCode.FRENCH: 'asi/gpt-fr-cased-base',
@@ -53,8 +52,7 @@ GENERATION_MODELS = MappingProxyType(
         LanguageCode.JAVANESE: 'w11wo/javanese-gpt2-small-imdb',
         LanguageCode.SUNDANESE: 'w11wo/sundanese-gpt2-base',
         LanguageCode.ALBANIAN: 'macedonizer/al-gpt2',
-    }
-)
+})
 
 
 class GPTAugmenterShortInputWarning(Warning):

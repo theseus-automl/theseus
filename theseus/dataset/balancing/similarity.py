@@ -25,8 +25,7 @@ from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 
 _MULTILANG_MODEL = 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
-SIMILARITY_MODELS = MappingProxyType(
-    {
+SIMILARITY_MODELS = MappingProxyType({
         # Mono-language models
         LanguageCode.ENGLISH: 'sentence-transformers/all-mpnet-base-v2',
 
@@ -80,8 +79,7 @@ SIMILARITY_MODELS = MappingProxyType(
         LanguageCode.URDU: _MULTILANG_MODEL,
         LanguageCode.VIETNAMESE: _MULTILANG_MODEL,
         LanguageCode.CHINESE: _MULTILANG_MODEL,
-    },
-)
+})
 
 
 class _SimilaritySampler(_Sampler, ABC):

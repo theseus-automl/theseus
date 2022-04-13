@@ -1,8 +1,10 @@
 import logging
 import sys
-# from enum import Enum
 
 from theseus.utils import extract_kwargs
+
+# from enum import Enum
+
 
 
 # class _Color(Enum):
