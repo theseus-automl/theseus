@@ -1,5 +1,9 @@
+from inspect import signature
 from typing import (
+    Any,
+    Callable,
     Collection,
+    Dict,
     Generator,
 )
 
@@ -22,3 +26,13 @@ def chunkify(
             chunk = chunk.tolist()
 
             yield chunk
+
+
+def extract_kwargs(
+    func: Callable,
+    **kwargs,
+) -> Dict[str, Any]:
+    args_names = [k for k, v in signature(func).parameters.items()]
+    args_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in args_names}
+
+    return args_dict
