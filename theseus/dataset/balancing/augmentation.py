@@ -5,11 +5,15 @@ import pandas as pd
 import torch
 
 from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
-from theseus.dataset.augmentations.generation import GPTAugmenter
+from theseus.dataset.augmentations.generation import (
+    GENERATION_MODELS,
+    GPTAugmenter,
+)
 from theseus.dataset.augmentations.random_insertion import RandomInsertionAugmenter
 from theseus.dataset.augmentations.random_replacement import RandomReplacementAugmenter
 from theseus.dataset.balancing._sampler import _prepare
 from theseus.dataset.text_dataset import TextDataset
+from theseus.lang_code import LanguageCode
 from theseus.utils import chunkify
 
 
@@ -68,6 +72,14 @@ class AugmentationOverSampler:
     def _select_augmenters(
         self,
     ) -> None:
+        augmenters = []
+
+        if self._target_lang == LanguageCode.ENGLISH:
+            augmenters.append(BackTranslationAugmenter)
+
+        if self._target_lang in GENERATION_MODELS:
+            augmenters.append(GPTAugmenter)
+
         if self._target_lang == 'en':
             self._augmenters = [
                 GPTAugmenter,
