@@ -3,6 +3,7 @@ from types import MappingProxyType
 
 from transformers import pipeline
 
+from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 
 RANDOM_REPLACEMENT_MODELS = MappingProxyType({
@@ -97,10 +98,14 @@ RANDOM_REPLACEMENT_MODELS = MappingProxyType({
 class RandomReplacementAugmenter:
     def __init__(
         self,
+        target_lang: LanguageCode,
     ) -> None:
+        if target_lang not in RANDOM_REPLACEMENT_MODELS:
+            raise UnsupportedLanguageError(f'generation model not found for {target_lang} language')
+
         self._unmasker = pipeline(
             'fill-mask',
-            model='bert-base-multilingual-cased',
+            model=RANDOM_REPLACEMENT_MODELS[target_lang],
         )
         self._cls_token = self._unmasker.tokenizer.cls_token
         self._mask_token = self._unmasker.tokenizer.mask_token
