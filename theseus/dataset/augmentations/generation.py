@@ -2,9 +2,7 @@ import warnings
 from random import randint
 from types import MappingProxyType
 
-from transformers import pipeline
-
-from theseus.exceptions import UnsupportedLanguageError
+from theseus.dataset.augmentations._abc import AbstractAugmenter
 from theseus.lang_code import LanguageCode
 from theseus.validators import Integer
 
@@ -59,7 +57,7 @@ class GPTAugmenterShortInputWarning(Warning):
     pass
 
 
-class GPTAugmenter:
+class GPTAugmenter(AbstractAugmenter):
     _min_input_len = Integer(min_value=5)
     _max_sequences = Integer(min_value=1)
 
@@ -69,16 +67,14 @@ class GPTAugmenter:
         min_input_len: int = 5,
         max_sequences: int = 10,
     ) -> None:
+        super().__init__(
+            target_lang,
+            GENERATION_MODELS,
+            'text-generation',
+        )
+
         self._min_input_len = min_input_len
         self._max_sequences = max_sequences
-
-        if target_lang not in GENERATION_MODELS:
-            raise UnsupportedLanguageError(f'generation model not found for {target_lang} language')
-
-        self._generator = pipeline(
-            'text-generation',
-            model=GENERATION_MODELS[target_lang],
-        )
 
     def __call__(
         self,
@@ -93,11 +89,10 @@ class GPTAugmenter:
             )
 
         num_new_words = randint(input_length // 2, input_length)
-        output = self._generator(
+        output = self._pipeline(
             text,
             max_length=input_length + num_new_words,
             num_return_sequences=self._max_sequences,
         )
-        augmented_text = output[randint(0, self._max_sequences - 1)]['generated_text']
 
-        return augmented_text
+        return output[randint(0, self._max_sequences - 1)]['generated_text']

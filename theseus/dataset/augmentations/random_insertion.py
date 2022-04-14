@@ -1,18 +1,9 @@
 from random import randint
-from typing import NoReturn
 
-from transformers import pipeline
+from theseus.dataset.augmentations._abc import FillMaskAugmenter
 
 
-class RandomInsertionAugmenter:
-    def __init__(
-        self,
-    ) -> NoReturn:
-        self._unmasker = pipeline(
-            'fill-mask',
-            model='bert-base-multilingual-cased',
-        )
-
+class RandomInsertionAugmenter(FillMaskAugmenter):
     def __call__(
         self,
         text: str,
@@ -20,7 +11,8 @@ class RandomInsertionAugmenter:
         tokens = text.split()
 
         idx = randint(1, len(tokens) - 2)
-        masked = ' '.join(tokens[:idx] + ['[MASK]'] + tokens[idx:])
-        augmented_text = self._unmasker(masked)[0]['sequence']
+        masked = ' '.join(tokens[:idx] + [self._mask_token] + tokens[idx:])
+        augmented_text = self._pipeline(masked)[0]['sequence']
+        augmented_text = augmented_text.replace(self._cls_token, '').replace(self._sep_token, '').strip()
 
         return augmented_text
