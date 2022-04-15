@@ -2,15 +2,14 @@ from typing import NoReturn
 
 import pytest
 
+from tests.not_raises import not_raises
+from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
 from theseus.dataset.augmentations.generation import (
     GPTAugmenter,
     GPTAugmenterShortInputWarning,
 )
-from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
 from theseus.dataset.augmentations.random_insertion import RandomInsertionAugmenter
 from theseus.dataset.augmentations.random_replacement import RandomReplacementAugmenter
-
-from tests.not_raises import not_raises
 
 
 @pytest.fixture()

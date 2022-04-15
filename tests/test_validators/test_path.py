@@ -6,6 +6,7 @@ from typing import (
 )
 
 import pytest
+from setup_class import setup_class_with_validator
 
 from tests.not_raises import not_raises
 from theseus.validators import (
@@ -13,7 +14,6 @@ from theseus.validators import (
     ExistingFile,
     ExistingPath,
 )
-from setup_class import setup_class_with_validator
 
 _CWD = Path(__file__).parent
 _TEST_DIR = _CWD / 'test_directory'

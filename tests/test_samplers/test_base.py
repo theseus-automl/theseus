@@ -6,11 +6,11 @@ from typing import (
 import pandas as pd
 import pytest
 
-from theseus.dataset.balancing._sampler import _prepare
 from tests.test_samplers.dataset import (
     prepare_balanced_dataset,
     prepare_imbalanced_dataset,
 )
+from theseus.dataset.balancing._sampler import _prepare
 
 
 def test_prepare_invalid_strategy() -> NoReturn:

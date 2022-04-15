@@ -5,10 +5,10 @@ from typing import (
 )
 
 import pytest
+from setup_class import setup_class_with_validator
 
 from tests.not_raises import not_raises
 from theseus.validators import Integer
-from setup_class import setup_class_with_validator
 
 
 def test_invalid_restrictions() -> NoReturn:

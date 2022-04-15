@@ -2,8 +2,8 @@ from typing import NoReturn
 
 import pytest
 
-from tests.test_validators.setup_class import setup_class_with_validator
 from tests.not_raises import not_raises
+from tests.test_validators.setup_class import setup_class_with_validator
 from theseus.validators.one_of import OneOf
 
 
