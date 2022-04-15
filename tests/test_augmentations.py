@@ -1,6 +1,11 @@
 import pytest
 
 from tests.not_raises import not_raises
+from theseus.dataset.augmentations._models import (
+    BACK_TRANSLATION_MODELS,
+    FILL_MASK_MODELS,
+    GENERATION_MODELS,
+)
 from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
 from theseus.dataset.augmentations.generation import (
     GPTAugmenter,
@@ -9,11 +14,6 @@ from theseus.dataset.augmentations.generation import (
 from theseus.dataset.augmentations.random import (
     RandomInsertionAugmenter,
     RandomReplacementAugmenter,
-)
-from theseus.dataset.augmentations._models import (
-    BACK_TRANSLATION_MODELS,
-    FILL_MASK_MODELS,
-    GENERATION_MODELS,
 )
 
 _TARGET_LANG = list(
