@@ -6,28 +6,39 @@ from theseus.dataset.augmentations.generation import (
     GPTAugmenter,
     GPTAugmenterShortInputWarning,
 )
-from theseus.dataset.augmentations.random_insertion import RandomInsertionAugmenter
-from theseus.dataset.augmentations.random_replacement import RandomReplacementAugmenter
+from theseus.dataset.augmentations.random import (
+    RandomInsertionAugmenter,
+    RandomReplacementAugmenter,
+)
+from theseus.dataset.augmentations._models import (
+    BACK_TRANSLATION_MODELS,
+    FILL_MASK_MODELS,
+    GENERATION_MODELS,
+)
+
+_TARGET_LANG = list(
+    set(BACK_TRANSLATION_MODELS.keys()) & set(FILL_MASK_MODELS.keys()) & set(GENERATION_MODELS.keys()),
+)[0]
 
 
 @pytest.fixture()
 def setup_gpt_augmenter():
-    return GPTAugmenter()
+    return GPTAugmenter(_TARGET_LANG)
 
 
 @pytest.fixture()
 def setup_back_translation_augmenter():
-    return BackTranslationAugmenter()
+    return BackTranslationAugmenter(_TARGET_LANG)
 
 
 @pytest.fixture()
 def setup_random_insertion_augmenter():
-    return RandomInsertionAugmenter()
+    return RandomInsertionAugmenter(_TARGET_LANG)
 
 
 @pytest.fixture()
 def setup_random_replacement_augmenter():
-    return RandomReplacementAugmenter()
+    return RandomReplacementAugmenter(_TARGET_LANG)
 
 
 def test_gpt_augmenter_short_input(setup_gpt_augmenter) -> None:
