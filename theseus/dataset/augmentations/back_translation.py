@@ -3,18 +3,24 @@ from typing import NoReturn
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
-    pipeline,
 )
 
+from theseus.dataset.augmentations._abc import AbstractAugmenter
+from theseus.dataset.augmentations._models import BACK_TRANSLATION_MODELS
+from theseus.lang_code import LanguageCode
 
-class BackTranslationAugmenter:
+
+class BackTranslationAugmenter(AbstractAugmenter):
     def __init__(
         self,
+        target_lang: LanguageCode,
     ) -> NoReturn:
-        self._translator_en_to_de = pipeline(
+        super().__init__(
+            target_lang,
+            BACK_TRANSLATION_MODELS,
             'translation_en_to_de',
-            model='t5-base',
         )
+
         self._tokenizer = AutoTokenizer.from_pretrained(
             'google/bert2bert_L-24_wmt_de_en',
             pad_token='<pad>',
@@ -27,7 +33,7 @@ class BackTranslationAugmenter:
         self,
         text: str,
     ) -> str:
-        en_to_de_output = self._translator_en_to_de(text)
+        en_to_de_output = self._pipeline(text)
         translated_text = en_to_de_output[0]['translation_text']
 
         input_ids = self._tokenizer(
