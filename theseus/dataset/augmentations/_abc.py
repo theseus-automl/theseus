@@ -6,7 +6,7 @@ from types import MappingProxyType
 
 from transformers import pipeline
 
-from theseus.dataset.augmentations._bert_models import FILL_MASK_MODELS
+from theseus.dataset.augmentations._models import FILL_MASK_MODELS
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 
