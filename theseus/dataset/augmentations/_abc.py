@@ -2,7 +2,7 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from types import MappingProxyType
+from typing import Mapping
 
 from transformers import pipeline
 
@@ -15,7 +15,7 @@ class AbstractAugmenter(ABC):
     def __init__(
         self,
         target_lang: LanguageCode,
-        supported_models: MappingProxyType[LanguageCode, str],
+        supported_models: Mapping[LanguageCode, str],
         task: str,
     ) -> None:
         if target_lang not in supported_models:
