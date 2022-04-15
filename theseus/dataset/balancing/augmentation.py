@@ -9,19 +9,20 @@ import pandas as pd
 import torch
 
 from theseus.dataset.augmentations._abc import AbstractAugmenter
-from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
-from theseus.dataset.augmentations.generation import GPTAugmenter
 from theseus.dataset.augmentations._models import (
     BACK_TRANSLATION_MODELS,
     FILL_MASK_MODELS,
     GENERATION_MODELS,
 )
+from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
+from theseus.dataset.augmentations.generation import GPTAugmenter
 from theseus.dataset.augmentations.random import (
     RandomInsertionAugmenter,
     RandomReplacementAugmenter,
 )
 from theseus.dataset.balancing._sampler import _prepare
 from theseus.dataset.text_dataset import TextDataset
+from theseus.exceptions import UnsupportedLanguageError
 from theseus.utils import chunkify
 
 
@@ -91,6 +92,9 @@ class AugmentationOverSampler:
         if self._target_lang in FILL_MASK_MODELS:
             augmenters.append(RandomInsertionAugmenter)
             augmenters.append(RandomReplacementAugmenter)
+
+        if not len(augmenters):
+            raise UnsupportedLanguageError(f'none of the augmentations is available for {self._target_lang} language')
 
         return augmenters
 
