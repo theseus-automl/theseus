@@ -39,10 +39,10 @@ def test_prepare_under_sampling(
     generator: Callable,
     target_samples: int,
 ) -> None:
-    texts, labels = generator()
+    dataset = generator()
     _, _, calculated = _prepare(
-        texts,
-        labels,
+        dataset.texts,
+        dataset.labels,
         'under',
     )
 
@@ -69,10 +69,10 @@ def test_prepare_over_sampling(
     generator: Callable,
     target_samples: int,
 ) -> None:
-    texts, labels = generator()
+    dataset = generator()
     _, _, calculated = _prepare(
-        texts,
-        labels,
+        dataset.texts,
+        dataset.labels,
         'over',
     )
 

@@ -8,19 +8,16 @@ from theseus.dataset.text_dataset import TextDataset
 
 
 def check_balance(
-    texts: pd.Series,
-    labels: pd.Series,
+    dataset: TextDataset
 ) -> bool:
-    df = pd.DataFrame(
-        {
-            'texts': texts,
-            'labels': labels,
-        },
-    ).reset_index()
     lengths = set()
+    _, counts = np.unique(
+        dataset.labels,
+        return_counts=True,
+    )
 
-    for label in df['labels'].unique():
-        lengths.add(len(df[df['labels'] == label]))
+    for count in counts:
+        lengths.add(count)
 
     return len(lengths) == 1
 

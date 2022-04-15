@@ -32,9 +32,9 @@ def test_random_over_sampler(
     generator,
     setup_random_over_sampler,
 ) -> None:
-    dataset = setup_random_over_sampler(*generator())
+    dataset = setup_random_over_sampler(generator())
 
-    assert check_balance(dataset['texts'], dataset['labels'])
+    assert check_balance(dataset)
 
 
 @pytest.mark.parametrize(
@@ -48,6 +48,6 @@ def test_random_under_sampler(
     generator,
     setup_random_under_sampler,
 ) -> None:
-    dataset = setup_random_under_sampler(*generator())
+    dataset = setup_random_under_sampler(generator())
 
-    assert check_balance(dataset['texts'], dataset['labels'])
+    assert check_balance(dataset)
