@@ -23,7 +23,7 @@ class AutoZeroShotClassifier:
         candidate_labels: List[str],
         lang: str,
         out_path: Path,
-    ) -> NoReturn:
+    ) -> None:
         self._candidate_labels = candidate_labels
         self._lang = lang
         self._out_path = out_path

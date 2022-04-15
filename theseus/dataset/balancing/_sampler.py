@@ -44,5 +44,5 @@ class _Sampler(ABC):
     def __init__(
         self,
         strategy: str,
-    ) -> NoReturn:
+    ) -> None:
         self._strategy = strategy

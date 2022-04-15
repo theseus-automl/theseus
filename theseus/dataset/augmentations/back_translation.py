@@ -14,7 +14,7 @@ class BackTranslationAugmenter(AbstractAugmenter):
     def __init__(
         self,
         target_lang: LanguageCode,
-    ) -> NoReturn:
+    ) -> None:
         super().__init__(
             target_lang,
             BACK_TRANSLATION_MODELS,

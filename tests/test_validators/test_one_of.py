@@ -1,5 +1,3 @@
-from typing import NoReturn
-
 import pytest
 
 from tests.not_raises import not_raises
@@ -30,7 +28,7 @@ def test_one_of(
     val,
     expected,
     exception,
-) -> NoReturn:
+) -> None:
     ctx = not_raises if exception is None else pytest.raises
     dtype = setup_class_with_validator(
         OneOf,

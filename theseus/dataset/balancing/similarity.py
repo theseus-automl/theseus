@@ -131,7 +131,7 @@ class _SimilaritySampler(_Sampler, ABC):
         index: pd.Index,
         cosine: torch.Tensor,
         k: int,
-    ) -> NoReturn:
+    ) -> None:
         raise NotImplementedError
 
     def _encode(
@@ -196,7 +196,7 @@ class SimilarityUnderSampler(_SimilaritySampler):
     def __init__(
         self,
         target_lang: LanguageCode,
-    ) -> NoReturn:
+    ) -> None:
         super().__init__(
             target_lang,
             'under',
@@ -225,7 +225,7 @@ class SimilarityOverSampler(_SimilaritySampler):
     def __init__(
         self,
         target_lang: LanguageCode,
-    ) -> NoReturn:
+    ) -> None:
         super().__init__(
             target_lang,
             'over',

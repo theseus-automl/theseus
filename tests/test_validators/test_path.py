@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import (
     Any,
-    NoReturn,
     Type,
 )
 
@@ -25,7 +24,7 @@ _TEST_FILE_BIN = _CWD / 'test_file.bin'
 @pytest.fixture()
 def setup_files_and_dirs(
     request,
-) -> NoReturn:
+) -> None:
     _TEST_DIR.mkdir(
         parents=True,
         exist_ok=True,
@@ -71,7 +70,7 @@ def test_existing_dir_validator(
     setup_files_and_dirs,
     val: Any,
     exception: Type[Exception],
-) -> NoReturn:
+) -> None:
     ctx = not_raises if exception is None else pytest.raises
     dtype = setup_class_with_validator(ExistingDir)
 
@@ -115,7 +114,7 @@ def test_existing_file_validator_with_extension(
     setup_files_and_dirs,
     val: Any,
     exception: Type[Exception],
-) -> NoReturn:
+) -> None:
     ctx = not_raises if exception is None else pytest.raises
     dtype = setup_class_with_validator(
         ExistingFile,
@@ -158,7 +157,7 @@ def test_existing_file_validator_no_extension(
     setup_files_and_dirs,
     val: Any,
     exception: Type[Exception],
-) -> NoReturn:
+) -> None:
     ctx = not_raises if exception is None else pytest.raises
     dtype = setup_class_with_validator(ExistingFile)
 
@@ -194,7 +193,7 @@ def test_existing_path_validator(
     setup_files_and_dirs,
     val: Any,
     exception: Type[Exception],
-) -> NoReturn:
+) -> None:
     ctx = not_raises if exception is None else pytest.raises
     dtype = setup_class_with_validator(ExistingPath)
 

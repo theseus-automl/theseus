@@ -30,7 +30,7 @@ class AugmentationOverSampler:
     def __init__(
         self,
         target_lang: str,
-    ) -> NoReturn:
+    ) -> None:
         self._target_lang = target_lang
         self._augmenters = self._select_augmenters()
 

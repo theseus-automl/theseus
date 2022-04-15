@@ -10,7 +10,7 @@ import torch
 
 def seed_everything(
     seed: Optional[int],
-) -> NoReturn:
+) -> None:
     if seed is None:
         max_seed_value = np.iinfo(np.uint32).max
         min_seed_value = np.iinfo(np.uint32).min

@@ -51,7 +51,7 @@ class _RandomSampler(_Sampler, ABC):
 class RandomUnderSampler(_RandomSampler):
     def __init__(
         self,
-    ) -> NoReturn:
+    ) -> None:
         super().__init__('under')
 
     @staticmethod
@@ -73,7 +73,7 @@ class RandomUnderSampler(_RandomSampler):
 class RandomOverSampler(_RandomSampler):
     def __init__(
         self,
-    ) -> NoReturn:
+    ) -> None:
         super().__init__('over')
 
     @staticmethod

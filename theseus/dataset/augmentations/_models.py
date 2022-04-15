@@ -2,6 +2,7 @@ from types import MappingProxyType
 
 from theseus.lang_code import LanguageCode
 
+# noinspection SpellCheckingInspection
 FILL_MASK_MODELS = MappingProxyType({
     LanguageCode.ENGLISH: 'bert-base-uncased',
     LanguageCode.SPANISH: 'PlanTL-GOB-ES/roberta-base-bne',
@@ -90,7 +91,7 @@ FILL_MASK_MODELS = MappingProxyType({
     LanguageCode.TOSK_ALBANIAN: 'macedonizer/al-roberta-base',
 })
 
-
+# noinspection SpellCheckingInspection
 GENERATION_MODELS = MappingProxyType({
     LanguageCode.ENGLISH: 'distilgpt2',
     LanguageCode.SPANISH: 'DeepESP/gpt2-spanish',

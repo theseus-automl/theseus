@@ -1,5 +1,3 @@
-from typing import NoReturn
-
 import pytest
 
 from tests.not_raises import not_raises
@@ -32,26 +30,26 @@ def setup_random_replacement_augmenter():
     return RandomReplacementAugmenter()
 
 
-def test_gpt_augmenter_short_input(setup_gpt_augmenter) -> NoReturn:
+def test_gpt_augmenter_short_input(setup_gpt_augmenter) -> None:
     with pytest.warns(GPTAugmenterShortInputWarning):
         setup_gpt_augmenter('short input')
 
 
-def test_gpt_augmenter(setup_gpt_augmenter) -> NoReturn:
+def test_gpt_augmenter(setup_gpt_augmenter) -> None:
     with not_raises(Exception):
         setup_gpt_augmenter('this is the normal input')
 
 
-def test_back_translation_augmenter(setup_back_translation_augmenter) -> NoReturn:
+def test_back_translation_augmenter(setup_back_translation_augmenter) -> None:
     with not_raises(Exception):
         setup_back_translation_augmenter('this is the normal input')
 
 
-def test_random_insertion_augmenter(setup_random_insertion_augmenter) -> NoReturn:
+def test_random_insertion_augmenter(setup_random_insertion_augmenter) -> None:
     with not_raises(Exception):
         setup_random_insertion_augmenter('this is the normal input')
 
 
-def test_random_replacement_augmenter(setup_random_replacement_augmenter) -> NoReturn:
+def test_random_replacement_augmenter(setup_random_replacement_augmenter) -> None:
     with not_raises(Exception):
         setup_random_replacement_augmenter('this is the normal input')

@@ -1,5 +1,3 @@
-from typing import NoReturn
-
 import pytest
 
 from tests.test_samplers.dataset import (
@@ -33,7 +31,7 @@ def setup_random_under_sampler() -> RandomUnderSampler:
 def test_random_over_sampler(
     generator,
     setup_random_over_sampler,
-) -> NoReturn:
+) -> None:
     dataset = setup_random_over_sampler(*generator())
 
     assert check_balance(dataset['texts'], dataset['labels'])
@@ -49,7 +47,7 @@ def test_random_over_sampler(
 def test_random_under_sampler(
     generator,
     setup_random_under_sampler,
-) -> NoReturn:
+) -> None:
     dataset = setup_random_under_sampler(*generator())
 
     assert check_balance(dataset['texts'], dataset['labels'])
