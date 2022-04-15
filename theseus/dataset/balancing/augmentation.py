@@ -1,19 +1,27 @@
 import gc
-from typing import NoReturn
+from typing import (
+    List,
+    NoReturn,
+    Type,
+)
 
 import pandas as pd
 import torch
 
+from theseus.dataset.augmentations._abc import AbstractAugmenter
 from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
-from theseus.dataset.augmentations.generation import (
+from theseus.dataset.augmentations.generation import GPTAugmenter
+from theseus.dataset.augmentations._models import (
+    BACK_TRANSLATION_MODELS,
+    FILL_MASK_MODELS,
     GENERATION_MODELS,
-    GPTAugmenter,
 )
-from theseus.dataset.augmentations.random_insertion import RandomInsertionAugmenter
-from theseus.dataset.augmentations.random_replacement import RandomReplacementAugmenter
+from theseus.dataset.augmentations.random import (
+    RandomInsertionAugmenter,
+    RandomReplacementAugmenter,
+)
 from theseus.dataset.balancing._sampler import _prepare
 from theseus.dataset.text_dataset import TextDataset
-from theseus.lang_code import LanguageCode
 from theseus.utils import chunkify
 
 
@@ -23,7 +31,7 @@ class AugmentationOverSampler:
         target_lang: str,
     ) -> NoReturn:
         self._target_lang = target_lang
-        self._augmenters = []
+        self._augmenters = self._select_augmenters()
 
     def __call__(
         self,
@@ -44,7 +52,7 @@ class AugmentationOverSampler:
                 augmented = []
 
                 for model_cls, chunk in zip(self._augmenters, chunkify(base, len(self._augmenters))):
-                    model = model_cls()
+                    model = model_cls(self._target_lang)
 
                     for text in chunk:
                         augmented.append(model(text))
@@ -71,22 +79,18 @@ class AugmentationOverSampler:
 
     def _select_augmenters(
         self,
-    ) -> None:
+    ) -> List[Type[AbstractAugmenter]]:
         augmenters = []
 
-        if self._target_lang == LanguageCode.ENGLISH:
+        if self._target_lang in BACK_TRANSLATION_MODELS:
             augmenters.append(BackTranslationAugmenter)
 
         if self._target_lang in GENERATION_MODELS:
             augmenters.append(GPTAugmenter)
 
-        if self._target_lang == 'en':
-            self._augmenters = [
-                GPTAugmenter,
-                BackTranslationAugmenter,
-            ]
-        else:
-            self._augmenters = [
-                RandomInsertionAugmenter,
-                RandomReplacementAugmenter,
-            ]
+        if self._target_lang in FILL_MASK_MODELS:
+            augmenters.append(RandomInsertionAugmenter)
+            augmenters.append(RandomReplacementAugmenter)
+
+        return augmenters
+
