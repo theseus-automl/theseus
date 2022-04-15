@@ -5,7 +5,8 @@ from enum import Enum
 
 
 class _Color(Enum):
-    grey = '\x1b[38;20m'
+    green = '\u001b[32m'
+    blue = '\u001b[34m'
     yellow = '\x1b[33;20m'
     red = '\x1b[31;20m'
     bold_red = '\x1b[31;1m'
@@ -26,8 +27,8 @@ class ColoredFormatter(logging.Formatter):
         )
 
         self._formats = {
-            logging.DEBUG: logging.Formatter(_Color.grey.value + fmt + _Color.reset.value),
-            logging.INFO: logging.Formatter(_Color.grey.value + fmt + _Color.reset.value),
+            logging.DEBUG: logging.Formatter(_Color.green.value + fmt + _Color.reset.value),
+            logging.INFO: logging.Formatter(_Color.blue.value + fmt + _Color.reset.value),
             logging.WARNING: logging.Formatter(_Color.yellow.value + fmt + _Color.reset.value),
             logging.ERROR: logging.Formatter(_Color.red.value + fmt + _Color.reset.value),
             logging.CRITICAL: logging.Formatter(_Color.bold_red.value + fmt + _Color.reset.value),
