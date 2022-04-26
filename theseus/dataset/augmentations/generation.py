@@ -1,6 +1,8 @@
 import warnings
 from random import randint
 
+import torch
+
 from theseus.dataset.augmentations._abc import AbstractAugmenter
 from theseus.dataset.augmentations._models import GENERATION_MODELS
 from theseus.lang_code import LanguageCode
@@ -18,6 +20,7 @@ class GPTAugmenter(AbstractAugmenter):
     def __init__(
         self,
         target_lang: LanguageCode,
+        device: torch.device,
         min_input_len: int = 5,
         max_sequences: int = 10,
     ) -> None:
@@ -25,6 +28,7 @@ class GPTAugmenter(AbstractAugmenter):
             target_lang,
             GENERATION_MODELS,
             'text-generation',
+            device,
         )
 
         self._min_input_len = min_input_len

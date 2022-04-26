@@ -1,6 +1,5 @@
 from typing import (
     Any,
-    NoReturn,
     Optional,
 )
 

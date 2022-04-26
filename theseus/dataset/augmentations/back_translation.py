@@ -1,5 +1,4 @@
-from typing import NoReturn
-
+import torch
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
@@ -14,11 +13,13 @@ class BackTranslationAugmenter(AbstractAugmenter):
     def __init__(
         self,
         target_lang: LanguageCode,
+        device: torch.device,
     ) -> None:
         super().__init__(
             target_lang,
             BACK_TRANSLATION_MODELS,
             'translation_en_to_de',
+            device,
         )
 
         self._tokenizer = AutoTokenizer.from_pretrained(

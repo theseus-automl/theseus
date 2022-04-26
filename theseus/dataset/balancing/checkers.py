@@ -1,7 +1,6 @@
 from typing import Tuple
 
 import numpy as np
-import pandas as pd
 
 from theseus.dataset._const import _STRATEGIES
 from theseus.dataset.text_dataset import TextDataset

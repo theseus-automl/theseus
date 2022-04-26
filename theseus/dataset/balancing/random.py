@@ -2,7 +2,6 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from typing import NoReturn
 
 import numpy as np
 import pandas as pd

@@ -1,7 +1,6 @@
 import gc
 from typing import (
     List,
-    NoReturn,
     Type,
 )
 
@@ -30,8 +29,10 @@ class AugmentationOverSampler:
     def __init__(
         self,
         target_lang: str,
+        device: torch.device,
     ) -> None:
         self._target_lang = target_lang
+        self._device = device
         self._augmenters = self._select_augmenters()
 
     def __call__(
@@ -53,7 +54,10 @@ class AugmentationOverSampler:
                 augmented = []
 
                 for model_cls, chunk in zip(self._augmenters, chunkify(base, len(self._augmenters))):
-                    model = model_cls(self._target_lang)
+                    model = model_cls(
+                        target_lang=self._target_lang,
+                        device=self._device,
+                    )
 
                     for text in chunk:
                         augmented.append(model(text))

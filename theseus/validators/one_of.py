@@ -1,7 +1,6 @@
 from typing import (
     Any,
     Container,
-    NoReturn,
 )
 
 from theseus.validators._validator import Validator

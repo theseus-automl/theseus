@@ -1,8 +1,5 @@
 import random
-from typing import (
-    NoReturn,
-    Optional,
-)
+from typing import Optional
 
 import numpy as np
 import torch

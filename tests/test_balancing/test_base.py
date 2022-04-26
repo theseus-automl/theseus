@@ -3,7 +3,7 @@ from typing import Callable
 import pandas as pd
 import pytest
 
-from tests.test_samplers.dataset import (
+from tests.test_balancing.dataset import (
     prepare_balanced_dataset,
     prepare_imbalanced_dataset,
 )

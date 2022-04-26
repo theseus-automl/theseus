@@ -4,6 +4,7 @@ from abc import (
 )
 from typing import Mapping
 
+import torch
 from transformers import pipeline
 
 from theseus.dataset.augmentations._models import FILL_MASK_MODELS
@@ -17,6 +18,7 @@ class AbstractAugmenter(ABC):
         target_lang: LanguageCode,
         supported_models: Mapping[LanguageCode, str],
         task: str,
+        device: torch.device,
     ) -> None:
         if target_lang not in supported_models:
             raise UnsupportedLanguageError(f'{target_lang} language is not supported')
@@ -24,6 +26,8 @@ class AbstractAugmenter(ABC):
         self._pipeline = pipeline(
             task,
             model=supported_models[target_lang],
+            framework='pt',
+            device=device,
         )
 
     @abstractmethod
@@ -38,11 +42,13 @@ class FillMaskAugmenter(AbstractAugmenter):
     def __init__(
         self,
         target_lang: LanguageCode,
+        device: torch.device,
     ) -> None:
         super().__init__(
             target_lang,
             FILL_MASK_MODELS,
             'fill-mask',
+            device,
         )
 
         self._cls_token = self._pipeline.tokenizer.cls_token

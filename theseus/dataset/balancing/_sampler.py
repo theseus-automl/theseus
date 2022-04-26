@@ -1,7 +1,6 @@
 from abc import ABC
 from typing import (
     Dict,
-    NoReturn,
     Tuple,
 )
 

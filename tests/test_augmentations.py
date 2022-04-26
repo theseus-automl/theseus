@@ -1,4 +1,5 @@
 import pytest
+import torch
 
 from tests.not_raises import not_raises
 from theseus.dataset.augmentations._models import (
@@ -23,22 +24,34 @@ _TARGET_LANG = list(
 
 @pytest.fixture()
 def setup_gpt_augmenter():
-    return GPTAugmenter(_TARGET_LANG)
+    return GPTAugmenter(
+        _TARGET_LANG,
+        torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu'),
+    )
 
 
 @pytest.fixture()
 def setup_back_translation_augmenter():
-    return BackTranslationAugmenter(_TARGET_LANG)
+    return BackTranslationAugmenter(
+        _TARGET_LANG,
+        torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+    )
 
 
 @pytest.fixture()
 def setup_random_insertion_augmenter():
-    return RandomInsertionAugmenter(_TARGET_LANG)
+    return RandomInsertionAugmenter(
+        _TARGET_LANG,
+        torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+    )
 
 
 @pytest.fixture()
 def setup_random_replacement_augmenter():
-    return RandomReplacementAugmenter(_TARGET_LANG)
+    return RandomReplacementAugmenter(
+        _TARGET_LANG,
+        torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+    )
 
 
 def test_gpt_augmenter_short_input(setup_gpt_augmenter) -> None:

@@ -1,4 +1,5 @@
 import pytest
+import torch
 
 from tests.test_balancing.dataset import (
     prepare_balanced_dataset,
@@ -11,7 +12,10 @@ from theseus.lang_code import LanguageCode
 
 @pytest.fixture()
 def setup_augmentation_over_sampler():
-    return AugmentationOverSampler(LanguageCode.ENGLISH)
+    return AugmentationOverSampler(
+        LanguageCode.ENGLISH,
+        torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu'),
+    )
 
 
 @pytest.mark.parametrize(

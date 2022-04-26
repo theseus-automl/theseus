@@ -3,10 +3,7 @@ from abc import (
     abstractmethod,
 )
 from types import MappingProxyType
-from typing import (
-    List,
-    NoReturn,
-)
+from typing import List
 
 import pandas as pd
 import torch
