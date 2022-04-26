@@ -45,10 +45,7 @@ class DatasetBalancer:
         if dataset.labels is None:
             raise ValueError('unable to balance dataset without labels')
 
-        is_balanced = check_balance(
-            dataset.texts,
-            dataset.labels,
-        )
+        is_balanced = check_balance(dataset)
 
         if is_balanced:
             _logger.warning('dataset is already balanced. Performing no actions')
