@@ -1,18 +1,13 @@
 from abc import ABC
 from typing import (
     Dict,
-    NoReturn,
     Tuple,
 )
 
 import pandas as pd
 
+from theseus.dataset._const import _STRATEGIES
 from theseus.validators.one_of import OneOf
-
-_STRATEGIES = {
-    'under': min,
-    'over': max,
-}
 
 
 def _prepare(
@@ -21,10 +16,7 @@ def _prepare(
     strategy: str,
 ) -> Tuple[pd.DataFrame, Dict[int, int], int]:
     if strategy not in _STRATEGIES:
-        raise ValueError(
-            f'unknown strategy "{strategy}". '
-            f'Consider using one of the following: {", ".join(_STRATEGIES.keys())}',
-        )
+        raise ValueError(f'unknown strategy "{strategy}". Possible values are: {", ".join(_STRATEGIES.keys())}')
 
     df = pd.DataFrame(
         {
@@ -48,5 +40,5 @@ class _Sampler(ABC):
     def __init__(
         self,
         strategy: str,
-    ) -> NoReturn:
+    ) -> None:
         self._strategy = strategy

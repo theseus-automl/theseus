@@ -1,14 +1,27 @@
 import gc
-from typing import NoReturn
+from typing import (
+    List,
+    Type,
+)
 
 import pandas as pd
 import torch
 
+from theseus.dataset.augmentations._abc import AbstractAugmenter
+from theseus.dataset.augmentations._models import (
+    BACK_TRANSLATION_MODELS,
+    FILL_MASK_MODELS,
+    GENERATION_MODELS,
+)
 from theseus.dataset.augmentations.back_translation import BackTranslationAugmenter
-from theseus.dataset.augmentations.gpt import GPTAugmenter
-from theseus.dataset.augmentations.random_insertion import RandomInsertionAugmenter
-from theseus.dataset.augmentations.random_replacement import RandomReplacementAugmenter
+from theseus.dataset.augmentations.generation import GPTAugmenter
+from theseus.dataset.augmentations.random import (
+    RandomInsertionAugmenter,
+    RandomReplacementAugmenter,
+)
 from theseus.dataset.balancing._sampler import _prepare
+from theseus.dataset.text_dataset import TextDataset
+from theseus.exceptions import UnsupportedLanguageError
 from theseus.utils import chunkify
 
 
@@ -16,18 +29,19 @@ class AugmentationOverSampler:
     def __init__(
         self,
         target_lang: str,
-    ) -> NoReturn:
+        device: torch.device,
+    ) -> None:
         self._target_lang = target_lang
-        self._augmenters = []
+        self._device = device
+        self._augmenters = self._select_augmenters()
 
     def __call__(
         self,
-        texts: pd.Series,
-        labels: pd.Series,
-    ) -> pd.DataFrame:
+        dataset: TextDataset,
+    ) -> TextDataset:
         df, counts, target_samples = _prepare(
-            texts,
-            labels,
+            dataset.texts,
+            dataset.labels,
             'over',
         )
 
@@ -40,12 +54,15 @@ class AugmentationOverSampler:
                 augmented = []
 
                 for model_cls, chunk in zip(self._augmenters, chunkify(base, len(self._augmenters))):
-                    model = model_cls()
+                    model = model_cls(
+                        target_lang=self._target_lang,
+                        device=self._device,
+                    )
 
                     for text in chunk:
                         augmented.append(model(text))
 
-                    del model
+                    del model  # noqa: WPS420
                     gc.collect()
                     torch.cuda.empty_cache()
 
@@ -60,18 +77,27 @@ class AugmentationOverSampler:
                     ignore_index=True,
                 )
 
-        return df
+        return TextDataset(
+            df['texts'],
+            df['labels'],
+        )
 
     def _select_augmenters(
         self,
-    ) -> None:
-        if self._target_lang == 'en':
-            self._augmenters = [
-                GPTAugmenter,
-                BackTranslationAugmenter,
-            ]
-        else:
-            self._augmenters = [
-                RandomInsertionAugmenter,
-                RandomReplacementAugmenter,
-            ]
+    ) -> List[Type[AbstractAugmenter]]:
+        augmenters = []
+
+        if self._target_lang in BACK_TRANSLATION_MODELS:
+            augmenters.append(BackTranslationAugmenter)
+
+        if self._target_lang in GENERATION_MODELS:
+            augmenters.append(GPTAugmenter)
+
+        if self._target_lang in FILL_MASK_MODELS:
+            augmenters.append(RandomInsertionAugmenter)
+            augmenters.append(RandomReplacementAugmenter)
+
+        if not len(augmenters):
+            raise UnsupportedLanguageError(f'none of the augmentations is available for {self._target_lang} language')
+
+        return augmenters

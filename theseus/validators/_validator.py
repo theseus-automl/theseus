@@ -4,7 +4,6 @@ from abc import (
 )
 from typing import (
     Any,
-    NoReturn,
     Optional,
     Type,
 )
@@ -22,7 +21,7 @@ class Validator(ABC):
         self,
         obj: Any,
         value: Any,
-    ) -> NoReturn:
+    ) -> None:
         self.validate(value)
         self.value = value
 
@@ -30,5 +29,5 @@ class Validator(ABC):
     def validate(
         self,
         value: Any,
-    ) -> NoReturn:
-        pass
+    ) -> None:
+        raise NotImplementedError

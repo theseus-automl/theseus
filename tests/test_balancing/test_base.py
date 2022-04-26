@@ -1,19 +1,16 @@
-from typing import (
-    Callable,
-    NoReturn,
-)
+from typing import Callable
 
 import pandas as pd
 import pytest
 
-from theseus.dataset.balancing._sampler import _prepare
-from tests.test_samplers.dataset import (
+from tests.test_balancing.dataset import (
     prepare_balanced_dataset,
     prepare_imbalanced_dataset,
 )
+from theseus.dataset.balancing._sampler import _prepare
 
 
-def test_prepare_invalid_strategy() -> NoReturn:
+def test_prepare_invalid_strategy() -> None:
     with pytest.raises(ValueError):
         _prepare(
             pd.Series(),
@@ -41,11 +38,11 @@ def test_prepare_invalid_strategy() -> NoReturn:
 def test_prepare_under_sampling(
     generator: Callable,
     target_samples: int,
-) -> NoReturn:
-    texts, labels = generator()
+) -> None:
+    dataset = generator()
     _, _, calculated = _prepare(
-        texts,
-        labels,
+        dataset.texts,
+        dataset.labels,
         'under',
     )
 
@@ -71,11 +68,11 @@ def test_prepare_under_sampling(
 def test_prepare_over_sampling(
     generator: Callable,
     target_samples: int,
-) -> NoReturn:
-    texts, labels = generator()
+) -> None:
+    dataset = generator()
     _, _, calculated = _prepare(
-        texts,
-        labels,
+        dataset.texts,
+        dataset.labels,
         'over',
     )
 

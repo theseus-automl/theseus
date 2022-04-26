@@ -1,32 +1,38 @@
 import warnings
 from random import randint
-from typing import NoReturn
 
-from transformers import pipeline
+import torch
 
+from theseus.dataset.augmentations._abc import AbstractAugmenter
+from theseus.dataset.augmentations._models import GENERATION_MODELS
+from theseus.lang_code import LanguageCode
 from theseus.validators import Integer
 
 
 class GPTAugmenterShortInputWarning(Warning):
-    pass
+    """Thrown when input for GPT is too short."""
 
 
-class GPTAugmenter:
+class GPTAugmenter(AbstractAugmenter):
     _min_input_len = Integer(min_value=5)
     _max_sequences = Integer(min_value=1)
 
     def __init__(
         self,
+        target_lang: LanguageCode,
+        device: torch.device,
         min_input_len: int = 5,
         max_sequences: int = 10,
-    ) -> NoReturn:
+    ) -> None:
+        super().__init__(
+            target_lang,
+            GENERATION_MODELS,
+            'text-generation',
+            device,
+        )
+
         self._min_input_len = min_input_len
         self._max_sequences = max_sequences
-
-        self._generator = pipeline(
-            'text-generation',
-            model='gpt2',
-        )
 
     def __call__(
         self,
@@ -41,11 +47,10 @@ class GPTAugmenter:
             )
 
         num_new_words = randint(input_length // 2, input_length)
-        output = self._generator(
+        output = self._pipeline(
             text,
             max_length=input_length + num_new_words,
             num_return_sequences=self._max_sequences,
         )
-        augmented_text = output[randint(0, self._max_sequences - 1)]['generated_text']
 
-        return augmented_text
+        return output[randint(0, self._max_sequences - 1)]['generated_text']

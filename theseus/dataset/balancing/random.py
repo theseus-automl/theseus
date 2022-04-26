@@ -2,7 +2,6 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from typing import NoReturn
 
 import numpy as np
 import pandas as pd
@@ -11,17 +10,17 @@ from theseus.dataset.balancing._sampler import (
     _prepare,
     _Sampler,
 )
+from theseus.dataset.text_dataset import TextDataset
 
 
 class _RandomSampler(_Sampler, ABC):
     def __call__(
         self,
-        texts: pd.Series,
-        labels: pd.Series,
-    ) -> pd.DataFrame:
+        dataset: TextDataset,
+    ) -> TextDataset:
         df, counts, target_samples = _prepare(
-            texts,
-            labels,
+            dataset.texts,
+            dataset.labels,
             self._strategy,
         )
 
@@ -33,13 +32,16 @@ class _RandomSampler(_Sampler, ABC):
                     label,
                 )
 
-        return df
+        return TextDataset(
+            df['texts'],
+            df['labels'],
+        )
 
     @staticmethod
     @abstractmethod
     def _update(
         df: pd.DataFrame,
-        n: int,
+        n_samples: int,
         label: int,
     ) -> pd.DataFrame:
         raise NotImplementedError
@@ -48,47 +50,43 @@ class _RandomSampler(_Sampler, ABC):
 class RandomUnderSampler(_RandomSampler):
     def __init__(
         self,
-    ) -> NoReturn:
+    ) -> None:
         super().__init__('under')
 
     @staticmethod
     def _update(
         df: pd.DataFrame,
-        n: int,
+        n_samples: int,
         label: int,
     ) -> pd.DataFrame:
         to_drop = np.random.choice(
             df[df['labels'] == label].index,
-            n,
+            n_samples,
             replace=False,
         )
-        df = df.drop(to_drop)
-
-        return df
+        return df.drop(to_drop)
 
 
 class RandomOverSampler(_RandomSampler):
     def __init__(
         self,
-    ) -> NoReturn:
+    ) -> None:
         super().__init__('over')
 
     @staticmethod
     def _update(
         df: pd.DataFrame,
-        n: int,
+        n_samples: int,
         label: int,
     ) -> pd.DataFrame:
         sampled = df[df['labels'] == label].sample(
-            n=n,
+            n=n_samples,
             replace=False,
         )
-        df = pd.concat(
+        return pd.concat(
             [
                 df,
                 sampled,
             ],
             ignore_index=True,
         )
-
-        return df

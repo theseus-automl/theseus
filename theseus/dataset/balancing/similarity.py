@@ -2,14 +2,12 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from typing import (
-    List,
-    NoReturn,
-)
+from types import MappingProxyType
+from typing import List
 
 import pandas as pd
 import torch
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: WPS111, WPS347, N812
 from transformers import (
     AutoModel,
     AutoTokenizer,
@@ -19,27 +17,91 @@ from theseus.dataset.balancing._sampler import (
     _prepare,
     _Sampler,
 )
+from theseus.dataset.text_dataset import TextDataset
+from theseus.exceptions import UnsupportedLanguageError
+from theseus.lang_code import LanguageCode
+
+_CLAMP_MIN = 1e-9
+
+_MULTILANG_MODEL = 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
+SIMILARITY_MODELS = MappingProxyType({
+    # Mono-language models
+    LanguageCode.ENGLISH: 'sentence-transformers/all-mpnet-base-v2',
+
+    # Multilanguage models
+    LanguageCode.ARABIC: _MULTILANG_MODEL,
+    LanguageCode.BULGARIAN: _MULTILANG_MODEL,
+    LanguageCode.CATALAN: _MULTILANG_MODEL,
+    LanguageCode.CZECH: _MULTILANG_MODEL,
+    LanguageCode.DANISH: _MULTILANG_MODEL,
+    LanguageCode.GERMAN: _MULTILANG_MODEL,
+    LanguageCode.GREEK: _MULTILANG_MODEL,
+    LanguageCode.SPANISH: _MULTILANG_MODEL,
+    LanguageCode.ESTONIAN: _MULTILANG_MODEL,
+    LanguageCode.PERSIAN: _MULTILANG_MODEL,
+    LanguageCode.FINNISH: _MULTILANG_MODEL,
+    LanguageCode.FRENCH: _MULTILANG_MODEL,
+    LanguageCode.GALICIAN: _MULTILANG_MODEL,
+    LanguageCode.GUJARATI: _MULTILANG_MODEL,
+    LanguageCode.HEBREW: _MULTILANG_MODEL,
+    LanguageCode.HINDI: _MULTILANG_MODEL,
+    LanguageCode.CROATIAN: _MULTILANG_MODEL,
+    LanguageCode.HUNGARIAN: _MULTILANG_MODEL,
+    LanguageCode.ARMENIAN: _MULTILANG_MODEL,
+    LanguageCode.INDONESIAN: _MULTILANG_MODEL,
+    LanguageCode.ITALIAN: _MULTILANG_MODEL,
+    LanguageCode.JAPANESE: _MULTILANG_MODEL,
+    LanguageCode.GEORGIAN: _MULTILANG_MODEL,
+    LanguageCode.KOREAN: _MULTILANG_MODEL,
+    LanguageCode.KURDISH: _MULTILANG_MODEL,
+    LanguageCode.LITHUANIAN: _MULTILANG_MODEL,
+    LanguageCode.LATVIAN: _MULTILANG_MODEL,
+    LanguageCode.MACEDONIAN: _MULTILANG_MODEL,
+    LanguageCode.MONGOLIAN: _MULTILANG_MODEL,
+    LanguageCode.MARATHI: _MULTILANG_MODEL,
+    LanguageCode.MALAY: _MULTILANG_MODEL,
+    LanguageCode.BURMESE: _MULTILANG_MODEL,
+    LanguageCode.NORWEGIAN: _MULTILANG_MODEL,
+    LanguageCode.DUTCH: _MULTILANG_MODEL,
+    LanguageCode.POLISH: _MULTILANG_MODEL,
+    LanguageCode.PORTUGUESE: _MULTILANG_MODEL,
+    LanguageCode.ROMANIAN: _MULTILANG_MODEL,
+    LanguageCode.RUSSIAN: _MULTILANG_MODEL,
+    LanguageCode.SLOVAK: _MULTILANG_MODEL,
+    LanguageCode.SLOVENIAN: _MULTILANG_MODEL,
+    LanguageCode.ALBANIAN: _MULTILANG_MODEL,
+    LanguageCode.SERBIAN: _MULTILANG_MODEL,
+    LanguageCode.SWEDISH: _MULTILANG_MODEL,
+    LanguageCode.THAI: _MULTILANG_MODEL,
+    LanguageCode.TURKISH: _MULTILANG_MODEL,
+    LanguageCode.UKRAINIAN: _MULTILANG_MODEL,
+    LanguageCode.URDU: _MULTILANG_MODEL,
+    LanguageCode.VIETNAMESE: _MULTILANG_MODEL,
+    LanguageCode.CHINESE: _MULTILANG_MODEL,
+})
 
 
 class _SimilaritySampler(_Sampler, ABC):
     def __init__(
         self,
-        model_name_or_path: str,
+        target_lang: LanguageCode,
         strategy: str,
-    ) -> NoReturn:
+    ) -> None:
         super().__init__(strategy)
-        
-        self._tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
-        self._model = AutoModel.from_pretrained(model_name_or_path)
+
+        if target_lang not in SIMILARITY_MODELS:
+            raise UnsupportedLanguageError(f'sentence similarity is not available for language {target_lang}')
+
+        self._tokenizer = AutoTokenizer.from_pretrained(SIMILARITY_MODELS[target_lang])
+        self._model = AutoModel.from_pretrained(SIMILARITY_MODELS[target_lang])
 
     def __call__(
         self,
-        texts: pd.Series,
-        labels: pd.Series,
-    ) -> pd.DataFrame:
+        dataset: TextDataset,
+    ) -> TextDataset:
         df, counts, target_samples = _prepare(
-            texts,
-            labels,
+            dataset.texts,
+            dataset.labels,
             self._strategy,
         )
 
@@ -56,7 +118,10 @@ class _SimilaritySampler(_Sampler, ABC):
                     abs(n_samples - target_samples),
                 )
 
-        return df
+        return TextDataset(
+            df['texts'].tolist(),
+            df['labels'].tolist(),
+        )
 
     @staticmethod
     @abstractmethod
@@ -64,8 +129,8 @@ class _SimilaritySampler(_Sampler, ABC):
         df: pd.DataFrame,
         index: pd.Index,
         cosine: torch.Tensor,
-        k: int,
-    ) -> NoReturn:
+        n_top: int,
+    ) -> None:
         raise NotImplementedError
 
     def _encode(
@@ -89,13 +154,11 @@ class _SimilaritySampler(_Sampler, ABC):
             model_output,
             encoded_input['attention_mask'],
         )
-        embeddings = F.normalize(
+        return F.normalize(
             embeddings,
             p=2,
             dim=1,
         )
-
-        return embeddings
 
     @staticmethod
     def _mean_pooling(
@@ -104,8 +167,9 @@ class _SimilaritySampler(_Sampler, ABC):
     ) -> torch.Tensor:
         token_embeddings = model_output.last_hidden_state
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        clamped = torch.clamp(input_mask_expanded.sum(1), min=_CLAMP_MIN)
 
-        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+        return torch.sum(token_embeddings * input_mask_expanded, 1) / clamped
 
     @staticmethod
     def _cosine_similarity(
@@ -121,18 +185,16 @@ class _SimilaritySampler(_Sampler, ABC):
         inv_mag = torch.sqrt(inv_square_mag)
 
         cosine = similarity * inv_mag
-        cosine = cosine.T * inv_mag
-
-        return cosine
+        return cosine.T * inv_mag
 
 
 class SimilarityUnderSampler(_SimilaritySampler):
     def __init__(
         self,
-        model_name_or_path: str,
-    ) -> NoReturn:
+        target_lang: LanguageCode,
+    ) -> None:
         super().__init__(
-            model_name_or_path,
+            target_lang,
             'under',
         )
 
@@ -141,27 +203,25 @@ class SimilarityUnderSampler(_SimilaritySampler):
         df: pd.DataFrame,
         index: pd.Index,
         cosine: torch.Tensor,
-        k: int,
+        n_top: int,
     ) -> pd.DataFrame:
         local_index = torch.topk(
             torch.sum(
                 cosine,
                 dim=0,
             ),
-            k=k,
+            k=n_top,
         ).indices.numpy()
-        df = df.drop(index[local_index])
-
-        return df
+        return df.drop(index[local_index])
 
 
 class SimilarityOverSampler(_SimilaritySampler):
     def __init__(
         self,
-        model_name_or_path: str,
-    ) -> NoReturn:
+        target_lang: LanguageCode,
+    ) -> None:
         super().__init__(
-            model_name_or_path,
+            target_lang,
             'over',
         )
 
@@ -170,23 +230,21 @@ class SimilarityOverSampler(_SimilaritySampler):
         df: pd.DataFrame,
         index: pd.Index,
         cosine: torch.Tensor,
-        k: int,
+        n_top: int,
     ) -> pd.DataFrame:
         local_index = torch.topk(
             torch.sum(
                 cosine,
                 dim=0,
             ),
-            k=k,
+            k=n_top,
             largest=False,
         ).indices.numpy()
 
-        df = pd.concat(
+        return pd.concat(
             [
                 df,
                 df.loc[index[local_index]],
             ],
             ignore_index=True,
         )
-
-        return df

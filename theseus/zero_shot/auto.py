@@ -1,18 +1,19 @@
 from pathlib import Path
-from typing import (
-    List,
-    NoReturn,
-)
+from typing import List
 
 import pandas as pd
 
-from theseus.classification.zero_shot._classifiers import (
+from theseus.lang_code import LanguageCode
+from theseus.log import setup_logger
+from theseus.plotting.classification import plot_class_distribution
+from theseus.validators import ExistingDir
+from theseus.zero_shot._classifiers import (
     MonolingualZeroShotClassifier,
     MultilingualZeroShotClassifier,
     ZeroShotClassifier,
 )
-from theseus.plotting.classification import plot_class_distribution
-from theseus.validators import ExistingDir
+
+_logger = setup_logger(__name__)
 
 
 class AutoZeroShotClassifier:
@@ -21,9 +22,9 @@ class AutoZeroShotClassifier:
     def __init__(
         self,
         candidate_labels: List[str],
-        lang: str,
+        lang: LanguageCode,
         out_path: Path,
-    ) -> NoReturn:
+    ) -> None:
         self._candidate_labels = candidate_labels
         self._lang = lang
         self._out_path = out_path
@@ -45,8 +46,7 @@ class AutoZeroShotClassifier:
                 self._candidate_labels,
             )
         except ValueError:
-            # TODO: logging
-            pass
+            _logger.error(f'monolingual model for {self._lang} is not available')
         else:
             self._fit_single_model(
                 mono,
@@ -69,9 +69,9 @@ class AutoZeroShotClassifier:
         df['texts'] = texts
         df['labels'] = [model(text) for text in texts]
 
-        df.to_csv(
-            out_path / 'predictions.csv',
-            sep='\t',  # TODO: config csv separator
+        df.to_parquet(
+            out_path / 'predictions.parquet.gzip',
+            compression='gzip',
         )
 
         plot_class_distribution(

@@ -1,8 +1,6 @@
-from typing import NoReturn
-
 import pytest
 
-from tests.test_samplers.dataset import (
+from tests.test_balancing.dataset import (
     prepare_balanced_dataset,
     prepare_imbalanced_dataset,
 )
@@ -33,10 +31,10 @@ def setup_random_under_sampler() -> RandomUnderSampler:
 def test_random_over_sampler(
     generator,
     setup_random_over_sampler,
-) -> NoReturn:
-    dataset = setup_random_over_sampler(*generator())
+) -> None:
+    dataset = setup_random_over_sampler(generator())
 
-    assert check_balance(dataset['texts'], dataset['labels'])
+    assert check_balance(dataset)
 
 
 @pytest.mark.parametrize(
@@ -49,7 +47,7 @@ def test_random_over_sampler(
 def test_random_under_sampler(
     generator,
     setup_random_under_sampler,
-) -> NoReturn:
-    dataset = setup_random_under_sampler(*generator())
+) -> None:
+    dataset = setup_random_under_sampler(generator())
 
-    assert check_balance(dataset['texts'], dataset['labels'])
+    assert check_balance(dataset)

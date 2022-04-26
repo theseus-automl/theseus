@@ -1,6 +1,5 @@
 from typing import (
     Any,
-    NoReturn,
     Optional,
 )
 
@@ -12,7 +11,7 @@ class Integer(Validator):
         self,
         min_value: Optional[int] = None,
         max_value: Optional[int] = None,
-    ) -> NoReturn:
+    ) -> None:
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError('min_value must be less or equal than max_value')
 
@@ -22,7 +21,7 @@ class Integer(Validator):
     def validate(
         self,
         value: Any,
-    ) -> NoReturn:
+    ) -> None:
         if not isinstance(value, int):
             raise TypeError(f'expected value {value} to be an int')
 

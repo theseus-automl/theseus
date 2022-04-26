@@ -1,6 +1,7 @@
 from collections import Counter
 from pathlib import Path
 from typing import (
+    Dict,
     List,
     Union,
 )
@@ -10,11 +11,11 @@ from fasttext import (
     load_model,
 )
 
-from theseus._exceptions import ModelNotFoundError
+from theseus.exceptions import ModelNotFoundError
 
-_FT_THRESHOLD = 0.0
+_FT_THRESHOLD = 0
 
-FastText.eprint = lambda x: None
+FastText.eprint = lambda _: None
 
 
 class FasttextWrapper:
@@ -35,10 +36,15 @@ class FasttextWrapper:
             **kwargs,
         )
 
-    def __getstate__(self):
+    def __getstate__(
+        self,
+    ) -> Dict[str, Path]:
         return {'path': self._model_path}
 
-    def __setstate__(self, state):
+    def __setstate__(
+        self,
+        state: Dict[str, Path],
+    ) -> None:
         self._model_path = state['path']
         self._model = load_model(str(self._model_path))
 

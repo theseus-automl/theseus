@@ -2,7 +2,6 @@ import re
 from pathlib import Path
 from typing import (
     Any,
-    NoReturn,
     Optional,
 )
 
@@ -15,7 +14,7 @@ class ExistingPath(Validator):
     def validate(
         self,
         value: Any,
-    ) -> NoReturn:
+    ) -> None:
         if not isinstance(value, Path):
             raise TypeError(f'expected value {value} to be a Path')
 
@@ -27,7 +26,7 @@ class ExistingFile(ExistingPath):
     def __init__(
         self,
         extension: Optional[str] = None,
-    ) -> NoReturn:
+    ) -> None:
         if extension is not None and not _EXTENSION_RE.match(extension):
             raise ValueError('invalid file extension')
 
@@ -36,7 +35,7 @@ class ExistingFile(ExistingPath):
     def validate(
         self,
         value: Any,
-    ) -> NoReturn:
+    ) -> None:
         super().validate(value)
 
         if not value.is_file():
@@ -50,7 +49,7 @@ class ExistingDir(ExistingPath):
     def validate(
         self,
         value: Any,
-    ) -> NoReturn:
+    ) -> None:
         super().validate(value)
 
         if not value.is_dir():

@@ -1,6 +1,5 @@
 from typing import (
     Any,
-    NoReturn,
     Type,
 )
 
@@ -21,7 +20,7 @@ def setup_class_with_validator(
         def __init__(
             self,
             val: Any,
-        ) -> NoReturn:
+        ) -> None:
             self.val = val
 
     return Dummy

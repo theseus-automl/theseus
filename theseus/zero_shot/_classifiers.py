@@ -1,18 +1,17 @@
+from types import MappingProxyType
 from typing import (
     List,
-    NoReturn,
     Union,
 )
 
 import numpy as np
 from transformers import pipeline
 
-from theseus._const import LanguageCode
+from theseus.lang_code import LanguageCode
 
-
-_MONOLINGUAL_MODELS = {
-    LanguageCode.english: 'facebook/bart-large-mnli',
-}
+_MONOLINGUAL_MODELS = MappingProxyType({
+    LanguageCode.ENGLISH: 'facebook/bart-large-mnli',
+})
 
 
 class ZeroShotClassifier:
@@ -20,7 +19,7 @@ class ZeroShotClassifier:
         self,
         model_name: str,
         candidate_labels: List[str],
-    ) -> NoReturn:
+    ) -> None:
         self._model_name = model_name
         self._model = pipeline(
             'zero-shot-classification',
@@ -36,9 +35,7 @@ class ZeroShotClassifier:
         if isinstance(texts, str):
             texts = [texts]
 
-        res = [entry['labels'][np.argmax(entry['scores'])] for entry in self._model(texts, self._candidate_labels)]
-
-        return res
+        return [entry['labels'][np.argmax(entry['scores'])] for entry in self._model(texts, self._candidate_labels)]
 
     @property
     def model_name(
@@ -51,7 +48,7 @@ class MultilingualZeroShotClassifier(ZeroShotClassifier):
     def __init__(
         self,
         candidate_labels: List[str],
-    ) -> NoReturn:
+    ) -> None:
         super().__init__(
             'joeddav/xlm-roberta-large-xnli',
             candidate_labels,
@@ -61,9 +58,9 @@ class MultilingualZeroShotClassifier(ZeroShotClassifier):
 class MonolingualZeroShotClassifier(ZeroShotClassifier):
     def __init__(
         self,
-        lang_code: str,
+        lang_code: LanguageCode,
         candidate_labels: List[str],
-    ) -> NoReturn:
+    ) -> None:
         if lang_code not in LanguageCode:
             raise ValueError(f'unknown language code {lang_code}')
 

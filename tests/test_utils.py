@@ -2,7 +2,10 @@ from itertools import chain
 
 import pytest
 
-from theseus.utils import chunkify
+from theseus.utils import (
+    chunkify,
+    extract_kwargs,
+)
 
 
 def test_invalid_num_chunks() -> None:
@@ -65,3 +68,41 @@ def test_num_chunks_lt_array_len(
 
     pytest.assume(set(arr) == set(chain.from_iterable(chunks)))
     pytest.assume(sizes[i] >= sizes[i + 1] for i in range(len(sizes) - 1))
+
+
+def test_extract_kwargs_no_args() -> None:
+    def dummy():
+        pass
+
+    assert extract_kwargs(dummy, a=1) == {}
+
+
+def test_extract_kwargs_no_matching_args() -> None:
+    def dummy(
+        a,
+        b,
+    ):
+        pass
+
+    assert extract_kwargs(dummy, c=1, d=2) == {}
+
+
+def test_extract_kwargs_all_matching_args() -> None:
+    def dummy(
+        a,
+        b,
+    ):
+        pass
+
+    assert extract_kwargs(dummy, a=1, b=2) == {'a': 1, 'b': 2}
+
+
+def test_extract_kwargs_not_all_matching_args() -> None:
+    def dummy(
+        a,
+        b,
+        c,
+    ):
+        pass
+
+    assert extract_kwargs(dummy, a=1, b=2, d=3) == {'a': 1, 'b': 2}
