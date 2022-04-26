@@ -3,6 +3,8 @@ from typing import List
 
 import pandas as pd
 
+from theseus.lang_code import LanguageCode
+from theseus.log import setup_logger
 from theseus.plotting.classification import plot_class_distribution
 from theseus.validators import ExistingDir
 from theseus.zero_shot._classifiers import (
@@ -11,6 +13,8 @@ from theseus.zero_shot._classifiers import (
     ZeroShotClassifier,
 )
 
+_logger = setup_logger(__name__)
+
 
 class AutoZeroShotClassifier:
     _out_path = ExistingDir()
@@ -18,7 +22,7 @@ class AutoZeroShotClassifier:
     def __init__(
         self,
         candidate_labels: List[str],
-        lang: str,
+        lang: LanguageCode,
         out_path: Path,
     ) -> None:
         self._candidate_labels = candidate_labels
@@ -42,8 +46,7 @@ class AutoZeroShotClassifier:
                 self._candidate_labels,
             )
         except ValueError:
-            # TODO: logging
-            pass
+            _logger.error(f'monolingual model for {self._lang} is not available')
         else:
             self._fit_single_model(
                 mono,
