@@ -30,4 +30,4 @@ class Validator(ABC):
         self,
         value: Any,
     ) -> None:
-        pass
+        raise NotImplementedError

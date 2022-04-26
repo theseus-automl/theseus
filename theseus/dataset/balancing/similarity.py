@@ -7,7 +7,7 @@ from typing import List
 
 import pandas as pd
 import torch
-from torch.nn import functional as F
+from torch.nn import functional as F  # noqa: WPS111, WPS347, N812
 from transformers import (
     AutoModel,
     AutoTokenizer,
@@ -20,6 +20,8 @@ from theseus.dataset.balancing._sampler import (
 from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
+
+_CLAMP_MIN = 1e-9
 
 _MULTILANG_MODEL = 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
 SIMILARITY_MODELS = MappingProxyType({
@@ -127,7 +129,7 @@ class _SimilaritySampler(_Sampler, ABC):
         df: pd.DataFrame,
         index: pd.Index,
         cosine: torch.Tensor,
-        k: int,
+        n_top: int,
     ) -> None:
         raise NotImplementedError
 
@@ -152,13 +154,11 @@ class _SimilaritySampler(_Sampler, ABC):
             model_output,
             encoded_input['attention_mask'],
         )
-        embeddings = F.normalize(
+        return F.normalize(
             embeddings,
             p=2,
             dim=1,
         )
-
-        return embeddings
 
     @staticmethod
     def _mean_pooling(
@@ -167,8 +167,9 @@ class _SimilaritySampler(_Sampler, ABC):
     ) -> torch.Tensor:
         token_embeddings = model_output.last_hidden_state
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        clamped = torch.clamp(input_mask_expanded.sum(1), min=_CLAMP_MIN)
 
-        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+        return torch.sum(token_embeddings * input_mask_expanded, 1) / clamped
 
     @staticmethod
     def _cosine_similarity(
@@ -184,9 +185,7 @@ class _SimilaritySampler(_Sampler, ABC):
         inv_mag = torch.sqrt(inv_square_mag)
 
         cosine = similarity * inv_mag
-        cosine = cosine.T * inv_mag
-
-        return cosine
+        return cosine.T * inv_mag
 
 
 class SimilarityUnderSampler(_SimilaritySampler):
@@ -204,18 +203,16 @@ class SimilarityUnderSampler(_SimilaritySampler):
         df: pd.DataFrame,
         index: pd.Index,
         cosine: torch.Tensor,
-        k: int,
+        n_top: int,
     ) -> pd.DataFrame:
         local_index = torch.topk(
             torch.sum(
                 cosine,
                 dim=0,
             ),
-            k=k,
+            k=n_top,
         ).indices.numpy()
-        df = df.drop(index[local_index])
-
-        return df
+        return df.drop(index[local_index])
 
 
 class SimilarityOverSampler(_SimilaritySampler):
@@ -233,23 +230,21 @@ class SimilarityOverSampler(_SimilaritySampler):
         df: pd.DataFrame,
         index: pd.Index,
         cosine: torch.Tensor,
-        k: int,
+        n_top: int,
     ) -> pd.DataFrame:
         local_index = torch.topk(
             torch.sum(
                 cosine,
                 dim=0,
             ),
-            k=k,
+            k=n_top,
             largest=False,
         ).indices.numpy()
 
-        df = pd.concat(
+        return pd.concat(
             [
                 df,
                 df.loc[index[local_index]],
             ],
             ignore_index=True,
         )
-
-        return df

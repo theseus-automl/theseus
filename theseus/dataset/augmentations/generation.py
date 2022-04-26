@@ -10,7 +10,7 @@ from theseus.validators import Integer
 
 
 class GPTAugmenterShortInputWarning(Warning):
-    pass
+    """Thrown when input for GPT is too short."""
 
 
 class GPTAugmenter(AbstractAugmenter):

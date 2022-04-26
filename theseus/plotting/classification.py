@@ -1,23 +1,24 @@
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from matplotlib import pyplot as plt
 
-# from matplotlib import ticker
+_DPI = 300
+_ROTATION = 90
 
 
 def plot_class_distribution(
-    data: pd.Series,
+    labels: pd.Series,
     out_path: Path,
     show: bool = False,
 ) -> None:
-    count = len(data)
+    count = len(labels)
 
-    count_ax = sns.countplot(x=data)
+    count_ax = sns.countplot(x=labels)
     plt.setp(
         count_ax.get_xticklabels(),
-        rotation=90,
+        rotation=_ROTATION,
     )
     count_ax.set(
         xlabel='Classes',
@@ -33,30 +34,26 @@ def plot_class_distribution(
     freq_ax.yaxis.tick_right()
     freq_ax.yaxis.set_label_position('right')
 
-    for p in count_ax.patches:
-        x = p.get_bbox().get_points()[:, 0]
-        y = p.get_bbox().get_points()[1, 1]
+    for patch in count_ax.patches:
+        x = patch.get_bbox().get_points()[:, 0].mean()  # noqa: WPS111
+        y = patch.get_bbox().get_points()[1, 1]  # noqa: WPS111
+        coords = (x, y)
 
         count_ax.annotate(
             f'{100 * y / count:.1f}%',
-            (
-                x.mean(),
-                y,
-            ),
+            coords,
             ha='center',
             va='bottom',
         )
 
-    # count_ax.yaxis.set_major_locator(ticker.LinearLocator(10))
     freq_ax.set_ylim(0, 100)
     count_ax.set_ylim(0, count)
-    # freq_ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
 
     freq_ax.grid(None)
 
     plt.savefig(
         out_path,
-        dpi=300,
+        dpi=_DPI,
         bbox_inches='tight',
     )
 

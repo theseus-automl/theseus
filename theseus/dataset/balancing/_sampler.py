@@ -16,10 +16,7 @@ def _prepare(
     strategy: str,
 ) -> Tuple[pd.DataFrame, Dict[int, int], int]:
     if strategy not in _STRATEGIES:
-        raise ValueError(
-            f'unknown strategy "{strategy}". '
-            f'Consider using one of the following: {", ".join(_STRATEGIES.keys())}',
-        )
+        raise ValueError(f'unknown strategy "{strategy}". Possible values are: {", ".join(_STRATEGIES.keys())}')
 
     df = pd.DataFrame(
         {

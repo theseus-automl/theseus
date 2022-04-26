@@ -7,13 +7,13 @@ from typing import Any
 
 class ContainsEnumMeta(EnumMeta):
     def __contains__(
-        cls,
-        item: Any,
+        self,
+        item: Any,  # noqa: WPS110
     ) -> bool:
-        return item in [v.value for v in cls.__members__.values()]
+        return item in {member.value for member in self.__members__.values()}
 
 
-class LanguageCode(str, Enum, metaclass=ContainsEnumMeta):
+class LanguageCode(Enum, metaclass=ContainsEnumMeta):
     AFRIKAANS = 'af'
     TOSK_ALBANIAN = 'als'
     AMHARIC = 'am'

@@ -102,6 +102,5 @@ class DatasetBalancer:
                 return sampler_cls(self._target_lang)
             except UnsupportedLanguageError:
                 _logger.error(
-                    f'sampler {sampler_cls} is not available for language {self._target_lang}, '
-                    f'so the class weight will be used',
+                    f'{sampler_cls} is unavailable for language {self._target_lang}, so the class weight will be used',
                 )

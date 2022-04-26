@@ -36,6 +36,4 @@ class RandomInsertionAugmenter(FillMaskAugmenter):
         idx = randint(1, len(tokens) - 2)
         masked = ' '.join(tokens[:idx] + [self._mask_token] + tokens[idx:])
         augmented_text = self._pipeline(masked)[0]['sequence']
-        augmented_text = augmented_text.replace(self._cls_token, '').replace(self._sep_token, '').strip()
-
-        return augmented_text
+        return augmented_text.replace(self._cls_token, '').replace(self._sep_token, '').strip()

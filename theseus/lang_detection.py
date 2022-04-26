@@ -13,7 +13,7 @@ from fasttext import (
 
 from theseus.exceptions import ModelNotFoundError
 
-_FT_THRESHOLD = 0.0
+_FT_THRESHOLD = 0
 
 FastText.eprint = lambda _: None
 

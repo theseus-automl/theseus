@@ -7,7 +7,7 @@ from theseus.dataset.text_dataset import TextDataset
 
 
 def check_balance(
-    dataset: TextDataset
+    dataset: TextDataset,
 ) -> bool:
     lengths = set()
     _, counts = np.unique(
@@ -24,7 +24,7 @@ def check_balance(
 def get_abs_deviation(
     dataset: TextDataset,
 ) -> Tuple[float, float]:
-    values, counts = np.unique(
+    labels, counts = np.unique(
         dataset.labels,
         return_counts=True,
     )
@@ -32,6 +32,6 @@ def get_abs_deviation(
     target_samples_over = _STRATEGIES['over'](counts)
 
     return (
-        np.median([np.abs(val - target_samples_under) / target_samples_under for val in values]),
-        np.median([np.abs(val - target_samples_over) / target_samples_over for val in values]),
+        np.median([np.abs(label - target_samples_under) / target_samples_under for label in labels]),
+        np.median([np.abs(label - target_samples_over) / target_samples_over for label in labels]),
     )

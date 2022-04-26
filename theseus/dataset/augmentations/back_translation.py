@@ -43,9 +43,8 @@ class BackTranslationAugmenter(AbstractAugmenter):
             add_special_tokens=False,
         ).input_ids
         output_ids = self._model_de_to_en.generate(input_ids)[0]
-        augmented_text = self._tokenizer.decode(
+
+        return self._tokenizer.decode(
             output_ids,
             skip_special_tokens=True,
         )
-
-        return augmented_text

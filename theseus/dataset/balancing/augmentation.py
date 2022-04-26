@@ -62,7 +62,7 @@ class AugmentationOverSampler:
                     for text in chunk:
                         augmented.append(model(text))
 
-                    del model
+                    del model  # noqa: WPS420
                     gc.collect()
                     torch.cuda.empty_cache()
 
@@ -101,4 +101,3 @@ class AugmentationOverSampler:
             raise UnsupportedLanguageError(f'none of the augmentations is available for {self._target_lang} language')
 
         return augmenters
-

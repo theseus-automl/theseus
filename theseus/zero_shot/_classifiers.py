@@ -1,3 +1,4 @@
+from types import MappingProxyType
 from typing import (
     List,
     Union,
@@ -8,9 +9,9 @@ from transformers import pipeline
 
 from theseus.lang_code import LanguageCode
 
-_MONOLINGUAL_MODELS = {
+_MONOLINGUAL_MODELS = MappingProxyType({
     LanguageCode.ENGLISH: 'facebook/bart-large-mnli',
-}
+})
 
 
 class ZeroShotClassifier:
@@ -34,9 +35,7 @@ class ZeroShotClassifier:
         if isinstance(texts, str):
             texts = [texts]
 
-        res = [entry['labels'][np.argmax(entry['scores'])] for entry in self._model(texts, self._candidate_labels)]
-
-        return res
+        return [entry['labels'][np.argmax(entry['scores'])] for entry in self._model(texts, self._candidate_labels)]
 
     @property
     def model_name(

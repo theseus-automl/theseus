@@ -1,6 +1,6 @@
 class UnsupportedLanguageError(Exception):
-    pass
+    """Thrown when target language is not supported by model."""
 
 
 class ModelNotFoundError(Exception):
-    pass
+    """Thrown when fastText language detection model is not found."""

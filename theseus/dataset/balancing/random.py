@@ -41,7 +41,7 @@ class _RandomSampler(_Sampler, ABC):
     @abstractmethod
     def _update(
         df: pd.DataFrame,
-        n: int,
+        n_samples: int,
         label: int,
     ) -> pd.DataFrame:
         raise NotImplementedError
@@ -56,17 +56,15 @@ class RandomUnderSampler(_RandomSampler):
     @staticmethod
     def _update(
         df: pd.DataFrame,
-        n: int,
+        n_samples: int,
         label: int,
     ) -> pd.DataFrame:
         to_drop = np.random.choice(
             df[df['labels'] == label].index,
-            n,
+            n_samples,
             replace=False,
         )
-        df = df.drop(to_drop)
-
-        return df
+        return df.drop(to_drop)
 
 
 class RandomOverSampler(_RandomSampler):
@@ -78,19 +76,17 @@ class RandomOverSampler(_RandomSampler):
     @staticmethod
     def _update(
         df: pd.DataFrame,
-        n: int,
+        n_samples: int,
         label: int,
     ) -> pd.DataFrame:
         sampled = df[df['labels'] == label].sample(
-            n=n,
+            n=n_samples,
             replace=False,
         )
-        df = pd.concat(
+        return pd.concat(
             [
                 df,
                 sampled,
             ],
             ignore_index=True,
         )
-
-        return df

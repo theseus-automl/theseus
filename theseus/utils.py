@@ -33,6 +33,5 @@ def extract_kwargs(
     **kwargs,
 ) -> Dict[str, Any]:
     args_names = [k for k, v in signature(func).parameters.items()]
-    args_dict = {k: kwargs.pop(k) for k in dict(kwargs) if k in args_names}
 
-    return args_dict
+    return {k: kwargs.pop(k) for k in dict(kwargs) if k in args_names}
