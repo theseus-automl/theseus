@@ -1,6 +1,7 @@
 import logging
 import sys
 from enum import Enum
+from typing import Any
 
 
 class _Color(Enum):
@@ -16,8 +17,8 @@ class ColoredFormatter(logging.Formatter):
     def __init__(
         self,
         fmt: str,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         super().__init__(
             fmt,
@@ -37,14 +38,14 @@ class ColoredFormatter(logging.Formatter):
         self,
         record: logging.LogRecord,
     ) -> str:
-        return self._formats.get(record.levelno).format(record)
+        return self._formats[record.levelno].format(record)
 
 
 def setup_logger(
     name: str,
     level: int = logging.DEBUG,
     fmt: str = '%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s',
-    **kwargs,
+    **kwargs: Any,
 ) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(level)

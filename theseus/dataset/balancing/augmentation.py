@@ -22,13 +22,14 @@ from theseus.dataset.augmentations.random import (
 from theseus.dataset.balancing._sampler import _prepare
 from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
+from theseus.lang_code import LanguageCode
 from theseus.utils import chunkify
 
 
 class AugmentationOverSampler:
     def __init__(
         self,
-        target_lang: str,
+        target_lang: LanguageCode,
         device: torch.device,
     ) -> None:
         self._target_lang = target_lang

@@ -12,6 +12,7 @@ from transformers import (
     AutoModel,
     AutoTokenizer,
 )
+from transformers.modeling_outputs import BaseModelOutput
 
 from theseus.dataset.balancing._sampler import (
     _prepare,
@@ -162,7 +163,7 @@ class _SimilaritySampler(_Sampler, ABC):
 
     @staticmethod
     def _mean_pooling(
-        model_output,
+        model_output: BaseModelOutput,
         attention_mask: torch.Tensor,
     ) -> torch.Tensor:
         token_embeddings = model_output.last_hidden_state

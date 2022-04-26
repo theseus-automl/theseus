@@ -30,7 +30,7 @@ def chunkify(
 
 def extract_kwargs(
     func: Callable,
-    **kwargs,
+    **kwargs: Any,
 ) -> Dict[str, Any]:
     args_names = [k for k, v in signature(func).parameters.items()]
 

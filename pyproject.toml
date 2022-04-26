@@ -52,3 +52,11 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 allow_untyped_globals = true
 allow_redefinition = true
+overrides = [
+    { ignore_missing_imports=true, module="pandas" },
+    { ignore_missing_imports=true, module="seaborn" },
+    { ignore_missing_imports=true, module="matplotlib" },
+    { ignore_missing_imports=true, module="fasttext" },
+    { ignore_missing_imports=true, module="sklearn.preprocessing" },
+    { ignore_missing_imports=true, module="sklearn.utils.class_weight" },
+]

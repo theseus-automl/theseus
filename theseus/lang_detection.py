@@ -1,6 +1,7 @@
 from collections import Counter
 from pathlib import Path
 from typing import (
+    Any,
     Dict,
     List,
     Union,
@@ -28,8 +29,8 @@ class FasttextWrapper:
 
     def predict(
         self,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> str:
         return self._model.predict(
             *args,
