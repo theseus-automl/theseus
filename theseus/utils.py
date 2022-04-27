@@ -2,18 +2,18 @@ from inspect import signature
 from typing import (
     Any,
     Callable,
-    Collection,
     Dict,
     Generator,
+    Sequence,
 )
 
 import numpy as np
 
 
 def chunkify(
-    it: Collection,
+    it: Sequence,
     num_chunks: int,
-) -> Generator[Collection, None, None]:
+) -> Generator[Sequence, None, None]:
     if num_chunks <= 0:
         raise ValueError('num_chunks must be greater than zero')
 
