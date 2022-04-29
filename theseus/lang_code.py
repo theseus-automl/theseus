@@ -190,3 +190,5 @@ class LanguageCode(Enum, metaclass=ContainsEnumMeta):
     YORUBA = 'yo'
     YUE_CHINESE = 'yue'
     CHINESE = 'zh'
+    NORTHERN_SOTHO = 'nso'
+    ZEEUWS = 'zea'
