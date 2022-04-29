@@ -19,7 +19,7 @@ from torchmetrics.functional import (
 from transformers import BertForSequenceClassification
 
 
-class BertClassifier(pl.LightningModule):
+class BertForClassification(pl.LightningModule):
     def __init__(
         self,
         model_name_or_path: Union[str, Path],
