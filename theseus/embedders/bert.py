@@ -1,7 +1,10 @@
 from types import MappingProxyType
 from typing import (
+    Generator,
     Iterable,
-    Union, Generator, Sequence,
+    Optional,
+    Sequence,
+    Union,
 )
 
 import torch
@@ -12,9 +15,13 @@ from transformers import (
 )
 from transformers.modeling_outputs import BaseModelOutput
 
-from theseus.exceptions import UnsupportedLanguageError
-from theseus.lang_code import LanguageCode
 from theseus._inference import auto_scale_batch_size
+from theseus.exceptions import (
+    NotEnoughResourcesError,
+    UnsupportedLanguageError,
+)
+from theseus.lang_code import LanguageCode
+from theseus.log import setup_logger
 
 _MULTILANG_MODEL = 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
 _SUPPORTED_LANGS = MappingProxyType({
@@ -74,7 +81,9 @@ _SUPPORTED_LANGS = MappingProxyType({
 })
 
 _CLAMP_MIN = 1e-9
-_BATCH_SIZE_SEARCH_START = 8192
+_BATCH_SIZE_SEARCH_START = 32768
+
+_logger = setup_logger(__name__)
 
 
 class BertEmbedder:
@@ -89,28 +98,31 @@ class BertEmbedder:
         self._tokenizer = AutoTokenizer.from_pretrained(_SUPPORTED_LANGS[target_lang])
         self._model = AutoModel.from_pretrained(_SUPPORTED_LANGS[target_lang]).to(device)
 
-        if device.type == 'cuda':
+        try:
             self._effective_batch_size = auto_scale_batch_size(
                 self,
                 ['a '.strip() * self._tokenizer.model_max_length for _ in range(_BATCH_SIZE_SEARCH_START)],
                 _BATCH_SIZE_SEARCH_START,
             )
-        else:
-            self._effective_batch_size = 1
+        except NotEnoughResourcesError as err:
+            _logger.error(err)
+            raise
 
     def __call__(
         self,
         texts: Union[str, Iterable[str]],
     ) -> torch.Tensor:
+        batch_size = self._effective_batch_size if hasattr(self, '_effective_batch_size') else len(texts)
+
         if isinstance(texts, str):
             texts = [texts]
 
-        if len(texts) <= self._effective_batch_size:
+        if len(texts) <= batch_size:
             return self._encode(texts)
 
         embeddings = []
 
-        for batch in self._make_batches(texts, self._effective_batch_size):
+        for batch in self._make_batches(texts, batch_size):
             embeddings.append(self._encode(batch))
 
         return torch.stack(embeddings)
