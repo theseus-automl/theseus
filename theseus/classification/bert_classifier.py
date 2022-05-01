@@ -8,6 +8,7 @@ from transformers import (
     BertTokenizer,
 )
 
+from theseus.accelerator import Accelerator
 from theseus.classification.models.bert import BertForClassification
 from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
@@ -26,6 +27,7 @@ class BertClassifier:
         target_lang: LanguageCode,
         num_labels: int,
         out_dir: Path,
+        accelerator: Accelerator,
     ) -> None:
         if target_lang not in _SUPPORTED_LANGS:
             raise UnsupportedLanguageError(f'BERT classifier is unavailable for {target_lang}')
@@ -35,6 +37,7 @@ class BertClassifier:
             num_labels,
         )
         self._out_dir = out_dir
+        self._accelerator_params = accelerator.to_dict()
 
     def fit(
         self,
@@ -52,6 +55,7 @@ class BertClassifier:
             auto_lr_find=True,
             max_epochs=_MAX_EPOCHS,
             deterministic=True,
+            **self._accelerator_params,
         )
         trainer.tune(self._model)
         trainer.fit(self._model)
