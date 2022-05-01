@@ -2,7 +2,6 @@ from types import MappingProxyType
 from typing import (
     Generator,
     Iterable,
-    Optional,
     Sequence,
     Union,
 )
