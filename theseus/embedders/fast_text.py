@@ -9,10 +9,10 @@ from urllib.request import urlretrieve
 import numpy as np
 from fasttext import load_model
 
+from theseus._paths import CACHE_DIR
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
-from theseus._paths import CACHE_DIR
 
 _SUPPORTED_LANGS = frozenset({
     LanguageCode.JAPANESE,
