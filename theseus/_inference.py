@@ -7,6 +7,8 @@ from typing import (
 
 import torch
 
+from theseus.exceptions import NotEnoughResourcesError
+
 
 def gc_with_cuda() -> None:
     gc.collect()
@@ -49,7 +51,7 @@ def auto_scale_batch_size(
 
                 gc_with_cuda()
             else:
-                raise
+                raise NotEnoughResourcesError('unable to find batch size due to memory issues')
         else:
             return batch_size
 
