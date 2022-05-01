@@ -15,6 +15,9 @@ class TextDataset(Dataset):
         texts: Sequence[str],
         labels: Optional[Sequence[str]] = None,
     ) -> None:
+        if len(texts) != len(labels):
+            raise ValueError(f'length mismatch: found {len(texts)} texts and {len(labels)} labels')
+
         if labels is not None:
             if len(texts) != len(labels):
                 raise ValueError(f'length mismatch: found {len(texts)} texts and {len(labels)} labels')
@@ -42,3 +45,9 @@ class TextDataset(Dataset):
             self.texts[idx],
             label,
         )
+
+    @property
+    def num_labels(
+        self,
+    ) -> Optional[int]:
+        return None if self.labels is None else len(set(self.labels))
