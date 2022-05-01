@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import (
     Dict,
@@ -6,47 +7,75 @@ from typing import (
 
 import pytorch_lightning as pl
 import torch
+from sklearn.model_selection import train_test_split
 from torch.nn import functional as F  # noqa: WPS111, WPS347, N812
 from torch.optim import (
     AdamW,
     Optimizer,
 )
+from torch.utils.data import DataLoader
 from torchmetrics.functional import (
     accuracy,
     f1_score,
     precision_recall,
 )
-from transformers import BertForSequenceClassification
+from transformers import BertForSequenceClassification, BertTokenizer, BatchEncoding
+from transformers.modeling_outputs import SequenceClassifierOutput
+
+from theseus.dataset.text_dataset import TextDataset
 
 
 class BertForClassification(pl.LightningModule):
     def __init__(
         self,
         model_name_or_path: Union[str, Path],
-        lr: float = 1e-5,
-        num_labels: int = 2,
+        num_labels: int,
     ) -> None:
         super().__init__()
+        self.save_hyperparameters()
 
         self._model = BertForSequenceClassification.from_pretrained(
             model_name_or_path,
             num_labels=num_labels,
         )
-        self._lr = lr
+        self._tokenizer = BertTokenizer.from_pretrained(model_name_or_path)
+
+        self.lr = None
+        self.batch_size = None
+        self._train_dataset = None
+        self._val_dataset = None
+
+    def set_data(
+        self,
+        dataset: TextDataset,
+    ) -> None:
+        train_indices, val_indices = train_test_split(
+            list(range(len(dataset.labels))),
+            test_size=0.2,
+            stratify=dataset.labels,
+        )
+        self._train_dataset = torch.utils.data.Subset(
+            dataset,
+            train_indices,
+        )
+        self._val_dataset = torch.utils.data.Subset(
+            dataset,
+            val_indices,
+        )
 
     def configure_optimizers(
         self,
     ) -> Optimizer:
         return AdamW(
             self._model.parameters(),
-            lr=self._lr,
+            lr=self.lr or self.learning_rate,
             amsgrad=True,
         )
 
     def forward(
         self,
-        inputs,
-    ):
+        inputs: BatchEncoding,
+    ) -> SequenceClassifierOutput:
         return self._model(**inputs)
 
     def training_step(
@@ -124,3 +153,41 @@ class BertForClassification(pl.LightningModule):
             f'{prefix}/recall',
             rec,
         )
+
+    def train_dataloader(
+        self,
+    ) -> DataLoader:
+        return DataLoader(
+            self._train_dataset,
+            shuffle=True,
+            num_workers=os.cpu_count(),
+            collate_fn=self._collate_fn,
+        )
+
+    def val_dataloader(
+        self,
+    ) -> DataLoader:
+        return DataLoader(
+            self._val_dataset,
+            shuffle=False,
+            num_workers=os.cpu_count(),
+            collate_fn=self._collate_fn,
+        )
+
+    def _collate_fn(
+        self,
+        input_data,
+    ) -> BatchEncoding:
+        texts, labels = zip(*input_data)
+        labels = torch.LongTensor(labels)
+
+        inputs = self._tokenizer(
+            texts,
+            return_tensors='pt',
+            padding='longest',
+            max_length=256,
+            truncation=True,
+        )
+        inputs['Class'] = labels
+
+        return inputs
