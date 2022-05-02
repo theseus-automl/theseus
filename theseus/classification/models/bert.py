@@ -19,7 +19,11 @@ from torchmetrics.functional import (
     f1_score,
     precision_recall,
 )
-from transformers import BertForSequenceClassification, BertTokenizer, BatchEncoding
+from transformers import (
+    BatchEncoding,
+    BertForSequenceClassification,
+    BertTokenizer,
+)
 from transformers.modeling_outputs import SequenceClassifierOutput
 
 from theseus.dataset.text_dataset import TextDataset
