@@ -194,8 +194,8 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
         if target_lang not in _SUPPORTED_LANGS:
             raise UnsupportedLanguageError(f'fastText embeddings are not available for {target_lang}')
 
-        self._target_lang = target_lang
-        self._model_name = f'cc.{self._target_lang.value}.300.bin'
+        self.target_lang = target_lang
+        self._model_name = f'cc.{self.target_lang.value}.300.bin'
 
         self._download_model()
         self._model = load_model(str(CACHE_DIR / self._model_name))
@@ -223,19 +223,19 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
         file = CACHE_DIR / self._model_name
         gz_file = CACHE_DIR / f'{file.name}.gz'
 
-        _logger.debug(f'model path for {self._target_lang} - {file.resolve()}')
+        _logger.debug(f'model path for {self.target_lang} - {file.resolve()}')
 
         if file.exists():
-            _logger.debug(f'model for {self._target_lang} already exists, skipping download')
+            _logger.debug(f'model for {self.target_lang} already exists, skipping download')
         else:
             url = f'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/{gz_file.name}'
-            _logger.debug(f'trying to download model for {self._target_lang} from {url}')
+            _logger.debug(f'trying to download model for {self.target_lang} from {url}')
             urlretrieve(
                 url,
                 gz_file,
             )
 
-            _logger.debug(f'model for {self._target_lang} successfully downloaded, unpacking...')
+            _logger.debug(f'model for {self.target_lang} successfully downloaded, unpacking...')
 
             with gzip.open(gz_file, 'rb') as gz_model:
                 with open(file, 'wb') as model:
@@ -246,4 +246,4 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
 
             gz_file.unlink(missing_ok=True)
 
-        _logger.debug(f'model for {self._target_lang} is ready to use')
+        _logger.debug(f'model for {self.target_lang} is ready to use')
