@@ -1,41 +1,44 @@
 import inspect
+import subprocess
 import warnings
+from io import StringIO
 from typing import (
     List,
     Optional,
     Union,
 )
 
+import pandas as pd
 import torch
 
 from theseus.exceptions import DeviceError
 from theseus.log import setup_logger
 from theseus.validators.one_of import OneOf
 
-_ACCELERATORS = frozenset({
+_ACCELERATORS = frozenset((
     'cpu',
     'gpu',
     'tpu',
     'ipu',
     'hpu',
     'auto',
-})
-_BACKENDS = frozenset({
+))
+_BACKENDS = frozenset((
     'native',
     'apex',
-})
-_AMP_LEVELS = frozenset({
+))
+_AMP_LEVELS = frozenset((
     'O0',
     'O1',
     'O2',
     'O3',
     None,
-})
-_PRECISIONS = frozenset({
+))
+_PRECISIONS = frozenset((
     16,
     32,
     64,
-})
+))
 
 _logger = setup_logger(__name__)
 DeviceList = List[Union[int, str]]
@@ -57,14 +60,14 @@ class Accelerator:
         ipus: Optional[int] = None,
     ) -> None:
         if amp_backend == 'apex' and amp_level is None:
-            raise ValueError(f'apex backend was chosen, but no level was provided')
+            raise ValueError('apex backend was chosen, but no level was provided')
 
         if accelerator == 'tpu' and tpu_cores is None:
             raise ValueError('tpu_cores param not provided when using tpu accelerator')
 
         if accelerator == 'ipu' and ipus is None:
             raise ValueError('ipus param not provided when using ipu accelerator')
-        
+
         if gpus is not None and auto_select_gpus:
             warnings.warn(
                 'both gpus and auto_select_gpus were provided, using gpus param',
@@ -102,6 +105,53 @@ class Accelerator:
                 params[name] = value
 
         return params
+
+    def select_single_gpu(
+        self,
+    ) -> torch.device:
+        device_error = DeviceError('no suitable GPU was found')
+
+        if self.gpus is None:
+            try:
+                gpu_stats = subprocess.check_output([
+                    'nvidia-smi',
+                    '--format=csv',
+                    '--query-gpu=memory.used,memory.free',
+                ])
+            except FileNotFoundError:
+                raise DeviceError('nvidia-smi not available')
+
+            gpu_df = pd.read_csv(
+                StringIO(gpu_stats),
+                names=[
+                    'memory.used',
+                    'memory.free',
+                ],
+                skiprows=1,
+            )
+            _logger.debug(f'GPU usage:\n{gpu_df}')
+
+            gpu_df['memory.free'] = gpu_df['memory.free'].map(lambda x: x.rstrip(' [MiB]'))
+            idx = gpu_df['memory.free'].idxmax()
+            free_mem = gpu_df.iloc[idx]['memory.free']
+            _logger.info(f'Picked GPU{idx} with {free_mem} free MiB')
+
+            return torch.device(idx)
+
+        for gpu in self.gpus:
+            device = torch.device(f'cuda:{gpu}')
+
+            try:
+                torch.tensor(
+                    [1],
+                    device=device,
+                )
+            except (AssertionError, RuntimeError):
+                raise device_error
+
+            return device
+
+        raise device_error
 
     def _validate_gpus(
         self,
