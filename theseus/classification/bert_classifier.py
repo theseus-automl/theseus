@@ -49,7 +49,7 @@ class BertClassifier:
             save_dir=self._out_dir / 'logs',
             name='BERT Classifier',
         )
-        trainer = pl.Trainer(  # TODO: accelerator
+        trainer = pl.Trainer(
             logger=logger,
             auto_scale_batch_size='power',
             auto_lr_find=True,

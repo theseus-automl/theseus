@@ -11,4 +11,4 @@ class NotEnoughResourcesError(Exception):
 
 
 class DeviceError(Exception):
-    """Thrown when CUDA device is unavailable"""
+    """Thrown when CUDA device is unavailable."""

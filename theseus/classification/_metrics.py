@@ -1,3 +1,5 @@
+from types import MappingProxyType
+
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
@@ -6,9 +8,9 @@ from sklearn.metrics import (
     recall_score,
 )
 
-CLASSIFICATION_METRICS = {
+CLASSIFICATION_METRICS = MappingProxyType({
     'accuracy': make_scorer(accuracy_score),
     'f1': make_scorer(f1_score),
     'precision': make_scorer(precision_score),
     'recall': make_scorer(recall_score),
-}
+})

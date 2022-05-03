@@ -84,16 +84,16 @@ class EmbeddingsClassifier(ABC):
                     (
                         'clf',
                         clf(),
-                    )
-                ]
+                    ),
+                ],
             )
             param_grid = add_param_grid_prefix(
                 self._emb_param_grid,
-                'emb'
+                'emb',
             )
             param_grid.update(add_param_grid_prefix(
                 clf_param_grid,
-                'clf'
+                'clf',
             ))
 
             grid = GridSearchCV(
@@ -112,7 +112,7 @@ class EmbeddingsClassifier(ABC):
                 {
                     'classifier': grid.best_estimator_,
                     'best_score': grid.best_score_,
-                }
+                },
             )
 
         result.sort(
