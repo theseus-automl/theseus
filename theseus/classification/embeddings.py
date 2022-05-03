@@ -9,7 +9,6 @@ from typing import (
 )
 
 import joblib
-import torch
 from sklearn.exceptions import (
     ConvergenceWarning,
     FitFailedWarning,
@@ -52,7 +51,6 @@ class EmbeddingsClassifier(ABC):
         embedder: Any,
         param_grid: Optional[Dict[str, Any]] = None,
         supported_languages: Optional[MappingProxyType] = None,
-        device: Optional[torch.device] = None,
     ) -> None:
         if supported_languages is not None and target_lang not in supported_languages:
             raise UnsupportedLanguageError(f'{self.__class__.__name__} is unavailable for {target_lang}')
@@ -61,7 +59,6 @@ class EmbeddingsClassifier(ABC):
         self._out_dir = out_dir
         self._embedder = embedder
         self._emb_param_grid = {} if param_grid is None else param_grid
-        self._device = device
 
     def fit(
         self,
