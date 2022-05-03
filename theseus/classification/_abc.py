@@ -1,3 +1,4 @@
+import warnings
 from abc import (
     ABC,
     abstractmethod,
@@ -12,8 +13,12 @@ from typing import (
 import joblib
 import numpy as np
 import torch
-from skl2onnx import convert_sklearn
+from skl2onnx import to_onnx
 from sklearn.base import BaseEstimator
+from sklearn.exceptions import (
+    ConvergenceWarning,
+    FitFailedWarning,
+)
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
@@ -31,6 +36,19 @@ from theseus.log import setup_logger
 from theseus.validators import ExistingDir
 
 _logger = setup_logger(__name__)
+
+warnings.simplefilter(
+    'ignore',
+    category=UserWarning,
+)
+warnings.simplefilter(
+    'ignore',
+    category=ConvergenceWarning,
+)
+warnings.simplefilter(
+    'ignore',
+    category=FitFailedWarning,
+)
 
 
 class EmbeddingsClassifier(ABC):
@@ -53,8 +71,7 @@ class EmbeddingsClassifier(ABC):
     def fit(
         self,
         dataset: TextDataset,
-    ):
-        # todo: train_test_split
+    ) -> float:
         embeddings = self._embed(dataset.texts)
         embeddings_path = self._out_dir / 'embeddings.npy'
         _logger.info(f'saving embeddings to {embeddings_path.resolve()}')
@@ -76,15 +93,18 @@ class EmbeddingsClassifier(ABC):
 
             grid = GridSearchCV(
                 clf(),
-                param_grid,
+                dict(param_grid),
                 n_jobs=-1,
-                scoring=[
-                    make_scorer(accuracy_score),
-                    make_scorer(f1_score),
-                    make_scorer(precision_score),
-                    make_scorer(recall_score),
-                ]
+                scoring={
+                    'accuracy': make_scorer(accuracy_score),
+                    'f1': make_scorer(f1_score),
+                    'precision': make_scorer(precision_score),
+                    'recall': make_scorer(recall_score),
+                },
+                refit='f1',
+                error_score=0,  # to avoid forbidden combinations
             )
+
             grid.fit(
                 embeddings,
                 dataset.labels,
@@ -131,9 +151,9 @@ class EmbeddingsClassifier(ABC):
         path: Path,
     ) -> None:
         _logger.info(f'converting to ONNX...')
-        onx = convert_sklearn(
+        onx = to_onnx(
             model,
-            sample,
+            sample.astype(np.float32),
         )
 
         _logger.info(f'saving ONNX model to {path.resolve()}')
