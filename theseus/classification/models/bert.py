@@ -124,6 +124,26 @@ class BertForClassification(pl.LightningModule):
             'val',
         )
 
+    def train_dataloader(
+        self,
+    ) -> DataLoader:
+        return DataLoader(
+            self._train_dataset,
+            shuffle=True,
+            num_workers=os.cpu_count(),
+            collate_fn=self._collate_fn,
+        )
+
+    def val_dataloader(
+        self,
+    ) -> DataLoader:
+        return DataLoader(
+            self._val_dataset,
+            shuffle=False,
+            num_workers=os.cpu_count(),
+            collate_fn=self._collate_fn,
+        )
+
     def _calculate_metrics(
         self,
         predictions: torch.Tensor,
@@ -156,26 +176,6 @@ class BertForClassification(pl.LightningModule):
         self.log(
             f'{prefix}/recall',
             rec,
-        )
-
-    def train_dataloader(
-        self,
-    ) -> DataLoader:
-        return DataLoader(
-            self._train_dataset,
-            shuffle=True,
-            num_workers=os.cpu_count(),
-            collate_fn=self._collate_fn,
-        )
-
-    def val_dataloader(
-        self,
-    ) -> DataLoader:
-        return DataLoader(
-            self._val_dataset,
-            shuffle=False,
-            num_workers=os.cpu_count(),
-            collate_fn=self._collate_fn,
         )
 
     def _collate_fn(
