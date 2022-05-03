@@ -1,34 +1,25 @@
 import warnings
-from abc import (
-    ABC,
-    abstractmethod,
-)
+from abc import ABC
 from pathlib import Path
 from types import MappingProxyType
 from typing import (
-    List,
+    Any,
+    Dict,
     Optional,
 )
 
 import joblib
-import numpy as np
 import torch
-from skl2onnx import to_onnx
-from sklearn.base import BaseEstimator
 from sklearn.exceptions import (
     ConvergenceWarning,
     FitFailedWarning,
 )
-from sklearn.metrics import (
-    accuracy_score,
-    f1_score,
-    make_scorer,
-    precision_score,
-    recall_score,
-)
 from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
 
+from theseus.classification._metrics import CLASSIFICATION_METRICS
 from theseus.classification._param_grids import CLASSIFIERS
+from theseus.classification._utils import add_param_grid_prefix
 from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
@@ -58,6 +49,8 @@ class EmbeddingsClassifier(ABC):
         self,
         target_lang: LanguageCode,
         out_dir: Path,
+        embedder: Any,
+        param_grid: Optional[Dict[str, Any]] = None,
         supported_languages: Optional[MappingProxyType] = None,
         device: Optional[torch.device] = None,
     ) -> None:
@@ -66,47 +59,56 @@ class EmbeddingsClassifier(ABC):
 
         self._target_lang = target_lang
         self._out_dir = out_dir
+        self._embedder = embedder
+        self._emb_param_grid = {} if param_grid is None else param_grid
         self._device = device
 
     def fit(
         self,
         dataset: TextDataset,
     ) -> float:
-        embeddings = self._embed(dataset.texts)
-        embeddings_path = self._out_dir / 'embeddings.npy'
-        _logger.info(f'saving embeddings to {embeddings_path.resolve()}')
-        np.save(
-            embeddings_path,
-            embeddings,
-        )
-
         result = []
 
-        for clf, param_grid in CLASSIFIERS:
+        for clf, clf_param_grid in CLASSIFIERS:
             _logger.info(f'trying {clf.__name__}')
 
             if dataset.class_weights is None:
                 _logger.info('no class weights will be used')
             else:
                 _logger.info('using class weights for classification')
-                param_grid['class_weight'] = dataset.class_weights
+                clf_param_grid['class_weight'] = dataset.class_weights
+
+            pipeline = Pipeline(
+                [
+                    (
+                        'emb',
+                        self._embedder,
+                    ),
+                    (
+                        'clf',
+                        clf(),
+                    )
+                ]
+            )
+            param_grid = add_param_grid_prefix(
+                self._emb_param_grid,
+                'emb'
+            )
+            param_grid.update(add_param_grid_prefix(
+                clf_param_grid,
+                'clf'
+            ))
 
             grid = GridSearchCV(
-                clf(),
+                pipeline,
                 dict(param_grid),
                 n_jobs=-1,
-                scoring={
-                    'accuracy': make_scorer(accuracy_score),
-                    'f1': make_scorer(f1_score),
-                    'precision': make_scorer(precision_score),
-                    'recall': make_scorer(recall_score),
-                },
+                scoring=CLASSIFICATION_METRICS,
                 refit='f1',
                 error_score=0,  # to avoid forbidden combinations
             )
-
             grid.fit(
-                embeddings,
+                dataset.texts,
                 dataset.labels,
             )
 
@@ -123,40 +125,10 @@ class EmbeddingsClassifier(ABC):
         )
 
         raw_model_path = self._out_dir / 'raw_clf.pkl'
-        _logger.info(f'saving raw model to {raw_model_path.resolve()}')
+        _logger.info(f'saving model to {raw_model_path.resolve()}')
         joblib.dump(
             result[0]['classifier'],
             raw_model_path,
         )
 
-        self._to_onnx(
-            result[0]['classifier'],
-            embeddings[0],
-            self._out_dir / 'clf.onnx',
-        )
-
         return result[0]['best_score']
-
-    @abstractmethod
-    def _embed(
-        self,
-        texts: List[str],
-    ) -> np.ndarray:
-        raise NotImplementedError
-
-    @staticmethod
-    def _to_onnx(
-        model: BaseEstimator,
-        sample: np.ndarray,
-        path: Path,
-    ) -> None:
-        _logger.info(f'converting to ONNX...')
-        onx = to_onnx(
-            model,
-            sample.astype(np.float32),
-        )
-
-        _logger.info(f'saving ONNX model to {path.resolve()}')
-
-        with open(path, 'wb') as f:
-            f.write(onx.SerializeToString())
