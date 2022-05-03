@@ -1,5 +1,6 @@
 from types import MappingProxyType
 from typing import (
+    Any,
     Generator,
     Iterable,
     Sequence,
@@ -7,6 +8,10 @@ from typing import (
 )
 
 import torch
+from sklearn.base import (
+    BaseEstimator,
+    TransformerMixin,
+)
 from torch.nn import functional as F  # noqa: WPS111, WPS347, N812
 from transformers import (
     AutoModel,
@@ -85,7 +90,7 @@ _BATCH_SIZE_SEARCH_START = 32768
 _logger = setup_logger(__name__)
 
 
-class BertEmbedder:
+class BertEmbedder(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         target_lang: LanguageCode,
@@ -107,9 +112,17 @@ class BertEmbedder:
             _logger.error(err)
             raise
 
-    def __call__(
+    def fit(
         self,
         texts: Union[str, Iterable[str]],
+        y: Any = None,
+    ) -> 'BertEmbedder':
+        return self
+
+    def transform(
+        self,
+        texts: Union[str, Iterable[str]],
+        y: Any = None,
     ) -> torch.Tensor:
         batch_size = self._effective_batch_size if hasattr(self, '_effective_batch_size') else len(texts)
 

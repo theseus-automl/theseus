@@ -1,6 +1,7 @@
 import gzip
 from shutil import copyfileobj
 from typing import (
+    Any,
     Iterable,
     Union,
 )
@@ -9,6 +10,10 @@ from urllib.request import urlretrieve
 import fasttext.FastText
 import numpy as np
 from fasttext import load_model
+from sklearn.base import (
+    BaseEstimator,
+    TransformerMixin,
+)
 
 from theseus._paths import CACHE_DIR
 from theseus.exceptions import UnsupportedLanguageError
@@ -181,7 +186,7 @@ _logger = setup_logger(__name__)
 fasttext.FastText.eprint = lambda x: None
 
 
-class FasttextEmbedder:
+class FasttextEmbedder(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         target_lang: LanguageCode,
@@ -195,9 +200,17 @@ class FasttextEmbedder:
         self._download_model()
         self._model = load_model(str(CACHE_DIR / self._model_name))
 
-    def __call__(
+    def fit(
         self,
         texts: Union[str, Iterable[str]],
+        y: Any = None,
+    ) -> 'FasttextEmbedder':
+        return self
+
+    def transform(
+        self,
+        texts: Union[str, Iterable[str]],
+        y: Any = None,
     ) -> np.ndarray:
         if isinstance(texts, str):
             texts = [texts]
