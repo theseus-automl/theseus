@@ -67,10 +67,7 @@ CLASSIFIERS = (
                 'elasticnet',
                 'none',
             ),
-            'dual': (
-                True,
-                False,
-            ),
+            'dual': (True,),
             'C': (
                 0.1,
                 1,
@@ -90,7 +87,8 @@ CLASSIFIERS = (
                 stop=0.9,
                 num=10,
             ),
-            'max_iter': (1000,)
+            'max_iter': (1000,),
+            'n_jobs': (-1,),
         }),
     ),
     (

@@ -99,7 +99,6 @@ class EmbeddingsClassifier(ABC):
             grid = GridSearchCV(
                 pipeline,
                 dict(param_grid),
-                n_jobs=-1,
                 scoring=CLASSIFICATION_METRICS,
                 refit='f1',
                 error_score=0,  # to avoid forbidden combinations
