@@ -6,6 +6,7 @@ from typing import (
 )
 from urllib.request import urlretrieve
 
+import fasttext.FastText
 import numpy as np
 from fasttext import load_model
 
@@ -176,6 +177,8 @@ _SUPPORTED_LANGS = frozenset({
 })
 
 _logger = setup_logger(__name__)
+
+fasttext.FastText.eprint = lambda x: None
 
 
 class FasttextEmbedder:
