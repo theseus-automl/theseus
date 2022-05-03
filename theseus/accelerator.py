@@ -1,7 +1,15 @@
 import inspect
 import warnings
-from typing import Optional, List, Union
+from typing import (
+    List,
+    Optional,
+    Union,
+)
 
+import torch
+
+from theseus.exceptions import DeviceError
+from theseus.log import setup_logger
 from theseus.validators.one_of import OneOf
 
 _ACCELERATORS = frozenset({
@@ -29,6 +37,7 @@ _PRECISIONS = frozenset({
     64,
 })
 
+_logger = setup_logger(__name__)
 DeviceList = List[Union[int, str]]
 
 
@@ -72,6 +81,12 @@ class Accelerator:
         self.tpu_cores = tpu_cores
         self.ipus = ipus
 
+        try:
+            self._validate_gpus()
+        except DeviceError as err:
+            _logger.error(f'device error: {err}')
+            raise
+
     def to_dict(
         self,
     ) -> dict:
@@ -87,3 +102,13 @@ class Accelerator:
                 params[name] = value
 
         return params
+
+    def _validate_gpus(
+        self,
+    ) -> None:
+        if isinstance(self.gpus, list):
+            for gpu in self.gpus:
+                try:
+                    torch.cuda.get_device_name(gpu)
+                except (AssertionError, RuntimeError):
+                    raise DeviceError(f'invalid device {gpu}')
