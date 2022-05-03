@@ -1,19 +1,28 @@
-from typing import List
+from pathlib import Path
 
-import numpy as np
+import torch
 
-from theseus.classification._abc import EmbeddingsClassifier
-from theseus.embedders.bert import BertEmbedder
+from theseus.classification.embeddings import EmbeddingsClassifier
+from theseus.embedders.bert import (
+    _SUPPORTED_LANGS,
+    BertEmbedder,
+)
+from theseus.lang_code import LanguageCode
 
 
 class SentenceBertClassifier(EmbeddingsClassifier):
-    def _embed(
+    def __init__(
         self,
-        texts: List[str],
-    ) -> np.ndarray:
-        embedder = BertEmbedder(
-            self._target_lang,
-            self._device,
+        target_lang: LanguageCode,
+        out_dir: Path,
+        device: torch.device,
+    ) -> None:
+        super().__init__(
+            target_lang,
+            out_dir,
+            BertEmbedder(
+                target_lang,
+                device,
+            ),
+            supported_languages=_SUPPORTED_LANGS,
         )
-
-        return embedder(texts).numpy()

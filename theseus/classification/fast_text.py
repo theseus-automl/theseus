@@ -1,16 +1,22 @@
-from typing import List
+from pathlib import Path
 
-import numpy as np
-
-from theseus.classification._abc import EmbeddingsClassifier
-from theseus.embedders.fast_text import FasttextEmbedder
+from theseus.classification.embeddings import EmbeddingsClassifier
+from theseus.embedders.fast_text import (
+    _SUPPORTED_LANGS,
+    FasttextEmbedder,
+)
+from theseus.lang_code import LanguageCode
 
 
 class FastTextClassifier(EmbeddingsClassifier):
-    def _embed(
+    def __init__(
         self,
-        texts: List[str],
-    ) -> np.ndarray:
-        embedder = FasttextEmbedder(self._target_lang)
-
-        return embedder(texts)
+        target_lang: LanguageCode,
+        out_dir: Path,
+    ) -> None:
+        super().__init__(
+            target_lang,
+            out_dir,
+            FasttextEmbedder(target_lang),
+            supported_languages=_SUPPORTED_LANGS,
+        )
