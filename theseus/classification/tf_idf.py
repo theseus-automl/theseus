@@ -2,8 +2,8 @@ from pathlib import Path
 
 from theseus.classification._param_grids import TFIDF_GRID
 from theseus.classification.embeddings import EmbeddingsClassifier
-from theseus.wrappers.dense_tf_idf import DenseTfidfVectorizer
 from theseus.lang_code import LanguageCode
+from theseus.wrappers.dense_tf_idf import DenseTfidfVectorizer
 
 
 class TfIdfClassifier(EmbeddingsClassifier):
