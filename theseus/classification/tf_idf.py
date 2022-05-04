@@ -1,9 +1,8 @@
 from pathlib import Path
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-
 from theseus.classification._param_grids import TFIDF_GRID
 from theseus.classification.embeddings import EmbeddingsClassifier
+from theseus.wrappers.dense_tf_idf import DenseTfidfVectorizer
 from theseus.lang_code import LanguageCode
 
 
@@ -16,6 +15,6 @@ class TfIdfClassifier(EmbeddingsClassifier):
         super().__init__(
             target_lang,
             out_dir,
-            TfidfVectorizer(),
+            DenseTfidfVectorizer(),
             TFIDF_GRID,
         )
