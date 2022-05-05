@@ -36,7 +36,9 @@ def auto_scale_batch_size(
 
     while True:
         try:
-            if eval_func is None:
+            if hasattr(model, 'transform'):
+                model.transform(example_input[:batch_size])
+            elif eval_func is None:
                 model(example_input[:batch_size])
             else:
                 eval_func(
