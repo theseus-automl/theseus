@@ -1,11 +1,16 @@
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import (
+    Any,
+    Dict,
+    Optional,
+)
 
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib import pyplot as plt, ticker
+from matplotlib import pyplot as plt
+from matplotlib import ticker
 from matplotlib.figure import Figure
 from sklearn.metrics._scorer import _PredictScorer
 

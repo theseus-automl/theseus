@@ -23,7 +23,10 @@ from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
-from theseus.plotting.classification import plot_gs_result, plot_metrics
+from theseus.plotting.classification import (
+    plot_gs_result,
+    plot_metrics,
+)
 from theseus.validators import ExistingDir
 
 _logger = setup_logger(__name__)
