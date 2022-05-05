@@ -14,10 +14,12 @@ from torch.optim import (
     Optimizer,
 )
 from torch.utils.data import DataLoader
-from torchmetrics.functional import (
-    accuracy,
-    f1_score,
-    precision_recall,
+from torchmetrics import (
+    Accuracy,
+    F1Score,
+    Metric,
+    Precision,
+    Recall,
 )
 from transformers import (
     BatchEncoding,
@@ -48,6 +50,12 @@ class BertForClassification(pl.LightningModule):
         self.batch_size = None
         self._train_dataset = None
         self._val_dataset = None
+        self._class_weights = None
+
+        self.metrics = {
+            'train': self._make_metrics(),
+            'val': self._make_metrics(),
+        }
 
     def set_data(
         self,
@@ -66,6 +74,7 @@ class BertForClassification(pl.LightningModule):
             dataset,
             val_indices,
         )
+        self._class_weights = dataset.class_weights
 
     def configure_optimizers(
         self,
@@ -92,6 +101,7 @@ class BertForClassification(pl.LightningModule):
         loss = F.cross_entropy(
             logits,
             labels,
+            weight=self._class_weights,
         )
         predictions = logits.argmax(axis=1)
 
@@ -106,6 +116,12 @@ class BertForClassification(pl.LightningModule):
         )
 
         return loss
+
+    def training_epoch_end(
+        self,
+        outputs: SequenceClassifierOutput,
+    ) -> None:
+        self._reset_metrics('train')
 
     def validation_step(
         self,
@@ -123,6 +139,12 @@ class BertForClassification(pl.LightningModule):
             labels,
             'val',
         )
+
+    def validation_epoch_end(
+        self,
+        outputs: SequenceClassifierOutput,
+    ) -> None:
+        self._reset_metrics('val')
 
     def train_dataloader(
         self,
@@ -150,33 +172,30 @@ class BertForClassification(pl.LightningModule):
         labels: torch.Tensor,
         prefix: str,
     ) -> None:
-        self.log(
-            f'{prefix}/accuracy',
-            accuracy(
-                predictions,
-                labels,
-            ),
-        )
-        self.log(
-            f'{prefix}/f1',
-            f1_score(
-                predictions,
-                labels,
-            ),
-        )
+        for name, metric in self.metrics[prefix]:
+            self.log(
+                f'{prefix}/name',
+                metric(
+                    predictions,
+                    labels,
+                ),
+            )
 
-        prec, rec = precision_recall(
-            predictions,
-            labels,
-        )
-        self.log(
-            f'{prefix}/precision',
-            prec,
-        )
-        self.log(
-            f'{prefix}/recall',
-            rec,
-        )
+    def _reset_metrics(
+        self,
+        prefix: str,
+    ) -> None:
+        for metric in self.metrics[prefix]:
+            metric.reset()
+
+    @staticmethod
+    def _make_metrics() -> Dict[str, Metric]:
+        return {
+            'accuracy': Accuracy(),
+            'f1': F1Score(),
+            'precision': Precision(),
+            'recall': Recall(),
+        }
 
     def _collate_fn(
         self,
