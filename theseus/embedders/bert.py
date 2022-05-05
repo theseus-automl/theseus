@@ -99,18 +99,23 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
         if target_lang not in _SUPPORTED_LANGS:
             raise UnsupportedLanguageError(f'BERT embeddings are not available for {target_lang}')
 
-        self._tokenizer = AutoTokenizer.from_pretrained(_SUPPORTED_LANGS[target_lang])
-        self._model = AutoModel.from_pretrained(_SUPPORTED_LANGS[target_lang]).to(device)
+        self.target_lang = target_lang
+        self.device = device
+        self._tokenizer = AutoTokenizer.from_pretrained(_SUPPORTED_LANGS[self.target_lang])
+        self._model = AutoModel.from_pretrained(_SUPPORTED_LANGS[self.target_lang]).to(self.device)
 
-        try:
-            self._effective_batch_size = auto_scale_batch_size(
-                self,
-                ['a '.strip() * self._tokenizer.model_max_length for _ in range(_BATCH_SIZE_SEARCH_START)],
-                _BATCH_SIZE_SEARCH_START,
-            )
-        except NotEnoughResourcesError as err:
-            _logger.error(err)
-            raise
+        if self.device.type == 'cuda':
+            try:
+                self._effective_batch_size = auto_scale_batch_size(
+                    self,
+                    ['a '.strip() * self._tokenizer.model_max_length for _ in range(_BATCH_SIZE_SEARCH_START)],
+                    _BATCH_SIZE_SEARCH_START,
+                )
+            except NotEnoughResourcesError as err:
+                _logger.error(err)
+                raise
+        else:
+            self._effective_batch_size = 1
 
     def fit(
         self,
