@@ -23,6 +23,7 @@ from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
+from theseus.plotting.classification import plot_gs_result, plot_metrics
 from theseus.validators import ExistingDir
 
 _logger = setup_logger(__name__)
@@ -102,10 +103,21 @@ class EmbeddingsClassifier(ABC):
                 scoring=dict(CLASSIFICATION_METRICS),
                 refit='f1',
                 error_score=0,  # to avoid forbidden combinations
+                return_train_score=True,
             )
             grid.fit(
                 dataset.texts,
                 dataset.labels,
+            )
+
+            plot_gs_result(
+                grid.cv_results_,
+                dict(CLASSIFICATION_METRICS),
+                self._out_dir,
+            )
+            plot_metrics(
+                grid.cv_results_,
+                self._out_dir,
             )
 
             result.append(
