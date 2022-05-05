@@ -185,7 +185,7 @@ class BertForClassification(pl.LightningModule):
         self,
         prefix: str,
     ) -> None:
-        for metric in self.metrics[prefix]:
+        for metric in self.metrics[prefix].values():
             metric.reset()
 
     @staticmethod
