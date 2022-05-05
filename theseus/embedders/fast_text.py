@@ -7,9 +7,7 @@ from typing import (
 )
 from urllib.request import urlretrieve
 
-import fasttext.FastText
 import numpy as np
-from fasttext import load_model
 from sklearn.base import (
     BaseEstimator,
     TransformerMixin,
@@ -19,6 +17,7 @@ from theseus._paths import CACHE_DIR
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
+from theseus.wrappers.picklable_fast_text import PicklableFastText
 
 _SUPPORTED_LANGS = frozenset({
     LanguageCode.JAPANESE,
@@ -183,8 +182,6 @@ _SUPPORTED_LANGS = frozenset({
 
 _logger = setup_logger(__name__)
 
-fasttext.FastText.eprint = lambda x: None
-
 
 class FasttextEmbedder(BaseEstimator, TransformerMixin):
     def __init__(
@@ -198,7 +195,7 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
         self._model_name = f'cc.{self.target_lang.value}.300.bin'
 
         self._download_model()
-        self._model = load_model(str(CACHE_DIR / self._model_name))
+        self._model = PicklableFastText(CACHE_DIR / self._model_name)
 
     def fit(
         self,
