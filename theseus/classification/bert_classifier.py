@@ -42,7 +42,7 @@ class BertClassifier:
     def fit(
         self,
         dataset: TextDataset,
-    ) -> None:
+    ) -> float:
         self._model.set_data(dataset)
 
         logger = pl.loggers.TensorBoardLogger(
@@ -59,6 +59,8 @@ class BertClassifier:
         )
         trainer.tune(self._model)
         trainer.fit(self._model)
+
+        return self._model.metrics['val']['f1'].compute().item()
 
     @staticmethod
     def collate_fn(
