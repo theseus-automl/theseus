@@ -18,7 +18,7 @@ def gc_with_cuda() -> None:
 
 
 def auto_scale_batch_size(
-    model: Callable,
+    model: Any,
     example_input: Any,
     initial_batch_size: int,
     eval_func: Optional[Callable] = None,
