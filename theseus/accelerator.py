@@ -2,6 +2,7 @@ import inspect
 import subprocess
 import warnings
 from io import StringIO
+from pathlib import Path
 from typing import (
     List,
     Optional,
@@ -10,6 +11,7 @@ from typing import (
 
 import pandas as pd
 import torch
+from yaml import safe_load
 
 from theseus.exceptions import DeviceError
 from theseus.log import setup_logger
@@ -134,7 +136,7 @@ class Accelerator:
             gpu_df['memory.free'] = gpu_df['memory.free'].map(lambda x: x.rstrip(' [MiB]'))
             idx = gpu_df['memory.free'].idxmax()
             free_mem = gpu_df.iloc[idx]['memory.free']
-            _logger.info(f'Picked GPU{idx} with {free_mem} free MiB')
+            _logger.info(f'picked GPU:{idx} with {free_mem} free MiB')
 
             return torch.device(idx)
 
@@ -152,6 +154,22 @@ class Accelerator:
             return device
 
         raise device_error
+
+    @classmethod
+    def from_file(
+        cls,
+        path: Path,
+    ) -> 'Accelerator':
+        if not path.exists():
+            raise FileNotFoundError(f'file {path} does not exist')
+
+        if not path.is_file() or path.suffix != '.yml':
+            raise ValueError(f'file {path} is not a valid YAML file')
+
+        with open(path, 'r', encoding='utf-8') as inp:
+            params = safe_load(inp)
+
+        return cls(**params)
 
     def _validate_gpus(
         self,
