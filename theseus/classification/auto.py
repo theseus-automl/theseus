@@ -5,6 +5,7 @@ from theseus.classification.bert_classifier import BertClassifier
 from theseus.classification.fast_text import FastTextClassifier
 from theseus.classification.sentence_bert import SentenceBertClassifier
 from theseus.classification.tf_idf import TfIdfClassifier
+from theseus.dataset.balancing.balancer import DatasetBalancer
 from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import DeviceError
 from theseus.lang_code import LanguageCode
@@ -20,10 +21,17 @@ class AutoClassifier:
         target_lang: LanguageCode,
         out_dir: Path,
         accelerator: Accelerator,
+        *args,
+        **kwargs,
     ) -> None:
         self._target_lang = target_lang
         self._out_dir = out_dir
         self._accelerator = accelerator
+        self._balancer = DatasetBalancer(
+            self._target_lang,
+            *args,
+            **kwargs,
+        )
 
         self._out_dir.mkdir(
             exist_ok=True,
@@ -38,6 +46,9 @@ class AutoClassifier:
             dataset.labels,
             self._out_dir / 'class_distribution.png',
         )
+
+        _logger.info('balancing dataset')
+        dataset = self._balancer(dataset)
 
         # tfidf
         _logger.info('trying TF-IDF classification')
