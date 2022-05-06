@@ -11,7 +11,7 @@ from typing import (
 
 import pandas as pd
 import torch
-from yaml import safe_load
+import yaml
 
 from theseus.exceptions import DeviceError
 from theseus.log import setup_logger
@@ -95,18 +95,18 @@ class Accelerator:
     def to_dict(
         self,
     ) -> dict:
-        params = {}
+        attrs = {}
 
-        for name in dir(self):
-            value = getattr(
+        for name in dir(self):  # noqa: WPS421
+            attr = getattr(
                 self,
                 name,
             )
 
-            if not name.startswith('__') and not inspect.ismethod(value):
-                params[name] = value
+            if not name.startswith('__') and not inspect.ismethod(attr):
+                attrs[name] = attr
 
-        return params
+        return attrs
 
     def select_single_gpu(
         self,
@@ -167,7 +167,7 @@ class Accelerator:
             raise ValueError(f'file {path} is not a valid YAML file')
 
         with open(path, 'r', encoding='utf-8') as inp:
-            params = safe_load(inp)
+            params = yaml.safe_load(inp)
 
         return cls(**params)
 

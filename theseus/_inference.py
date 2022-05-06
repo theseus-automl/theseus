@@ -36,7 +36,7 @@ def auto_scale_batch_size(
 
     while True:
         try:
-            if hasattr(model, 'transform'):
+            if hasattr(model, 'transform'):  # noqa: WPS421
                 model.transform(example_input[:batch_size])
             elif eval_func is None:
                 model(example_input[:batch_size])
@@ -82,18 +82,18 @@ def _is_cudnn_snafu(
     exception: Exception,
 ) -> bool:
     # For / because of https://github.com/pytorch/pytorch/issues/4107
-    return (
-        isinstance(exception, RuntimeError)
-        and len(exception.args) == 1
-        and 'cuDNN error: CUDNN_STATUS_NOT_SUPPORTED.' in exception.args[0]
-    )
+    is_runtime_error = isinstance(exception, RuntimeError)
+    is_correct_args_len = len(exception.args) == 1
+    is_cudnn_error = 'cuDNN error: CUDNN_STATUS_NOT_SUPPORTED.' in exception.args[0]
+
+    return is_runtime_error and is_correct_args_len and is_cudnn_error
 
 
 def _is_out_of_cpu_memory(
     exception,
 ) -> bool:
-    return (
-        isinstance(exception, RuntimeError)
-        and len(exception.args) == 1
-        and 'DefaultCPUAllocator: can\'t allocate memory' in exception.args[0]
-    )
+    is_runtime_error = isinstance(exception, RuntimeError)
+    is_correct_args_len = len(exception.args) == 1
+    is_allocator_error = "DefaultCPUAllocator: can't allocate memory" in exception.args[0]
+
+    return is_runtime_error and is_correct_args_len and is_allocator_error

@@ -56,4 +56,3 @@ class ZeroShotClassifier:
             texts = [texts]
 
         return [entry['labels'][np.argmax(entry['scores'])] for entry in self._model(texts, self._candidate_labels)]
-

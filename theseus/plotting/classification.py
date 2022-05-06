@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
-from matplotlib import ticker
+# from matplotlib import ticker
 from matplotlib.figure import Figure
 from sklearn.metrics._scorer import _PredictScorer
 
@@ -128,7 +128,7 @@ def plot_metrics(
     out_path: Path,
     show: bool = False,
 ) -> None:
-    for split in ['train', 'test']:
+    for split in ('train', 'test'):
         _plot_split_metrics(
             gs_result,
             split,
@@ -148,13 +148,13 @@ def _plot_split_metrics(
     for key in gs_result:
         if key.startswith('split') and split in key:
             metrics[key.split('_')[-1]].append(key)
-    
+
     fig, axes = plt.subplots(
         ncols=len(metrics),
         figsize=(40, 10),
     )
     fig.suptitle(f'Metrics for {split}')
-    
+
     for metric, ax in zip(metrics, axes):
         ax.set(
             xlabel=metric,
@@ -270,18 +270,18 @@ def _save_fig(
     show: bool,
     fig: Optional[Figure] = None,
 ) -> None:
-    _fig = plt if fig is None else fig
+    used_fig = plt if fig is None else fig
 
-    _fig.savefig(
+    used_fig.savefig(
         out_path,
         dpi=_Defaults.dpi,
         bbox_inches='tight',
     )
 
     if show:
-        _fig.show()
+        used_fig.show()
 
-    if isinstance(_fig, Figure):
-        plt.close(_fig)
+    if isinstance(used_fig, Figure):
+        plt.close(used_fig)
     else:
         plt.close()

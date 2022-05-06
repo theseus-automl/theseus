@@ -19,7 +19,7 @@ from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
 from theseus.wrappers.picklable_fast_text import PicklableFastText
 
-_SUPPORTED_LANGS = frozenset({
+_SUPPORTED_LANGS = frozenset((
     LanguageCode.JAPANESE,
     LanguageCode.ARAGONESE,
     LanguageCode.KIRGHIZ,
@@ -178,7 +178,7 @@ _SUPPORTED_LANGS = frozenset({
     LanguageCode.ENGLISH,
     LanguageCode.ICELANDIC,
     LanguageCode.ROMANSH,
-})
+))
 
 _logger = setup_logger(__name__)
 

@@ -129,17 +129,15 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
         texts: Union[str, Iterable[str]],
         y: Any = None,
     ) -> torch.Tensor:
-        batch_size = self._effective_batch_size if hasattr(self, '_effective_batch_size') else len(texts)
-
         if isinstance(texts, str):
             texts = [texts]
 
-        if len(texts) <= batch_size:
+        if len(texts) <= self._effective_batch_size:
             return self._encode(texts)
 
         embeddings = []
 
-        for batch in self._make_batches(texts, batch_size):
+        for batch in self._make_batches(texts, self._effective_batch_size):
             embeddings.append(self._encode(batch))
 
         return torch.stack(embeddings)
@@ -176,8 +174,10 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
         inp: Sequence,
         batch_size: int,
     ) -> Generator[Sequence, None, None]:
-        for i in range(0, len(inp), batch_size):
-            yield inp[i:i + batch_size]
+        yield from (
+            inp[i:i + batch_size]
+            for i in range(0, len(inp), batch_size)
+        )
 
     @staticmethod
     def _mean_pooling(

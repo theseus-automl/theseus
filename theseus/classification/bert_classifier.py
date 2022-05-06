@@ -2,11 +2,6 @@ from pathlib import Path
 from types import MappingProxyType
 
 import pytorch_lightning as pl
-import torch
-from transformers import (
-    BatchEncoding,
-    BertTokenizer,
-)
 
 from theseus.accelerator import Accelerator
 from theseus.classification.models.bert import BertForClassification
@@ -61,22 +56,3 @@ class BertClassifier:
         trainer.fit(self._model)
 
         return self._model.metrics['val']['f1'].compute().item()
-
-    @staticmethod
-    def collate_fn(
-        input_data,
-        tokenizer: BertTokenizer,
-    ) -> BatchEncoding:
-        texts, labels = zip(*input_data)
-        labels = torch.LongTensor(labels)
-
-        inputs = tokenizer(
-            texts,
-            return_tensors='pt',
-            padding='longest',
-            max_length=256,
-            truncation=True,
-        )
-        inputs['Class'] = labels
-
-        return inputs

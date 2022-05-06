@@ -172,7 +172,7 @@ class BertForClassification(pl.LightningModule):
         labels: torch.Tensor,
         prefix: str,
     ) -> None:
-        for name, metric in self.metrics[prefix]:
+        for metric in self.metrics[prefix].values():
             self.log(
                 f'{prefix}/name',
                 metric(
@@ -208,7 +208,7 @@ class BertForClassification(pl.LightningModule):
             texts,
             return_tensors='pt',
             padding='longest',
-            max_length=256,
+            max_length=self._tokenizer.model_max_length,
             truncation=True,
         )
         inputs['Class'] = labels
