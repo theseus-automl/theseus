@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
-# from matplotlib import ticker
 from matplotlib.figure import Figure
+from matplotlib.ticker import StrMethodFormatter
 from sklearn.metrics._scorer import _PredictScorer
 
 from theseus.log import setup_logger
@@ -160,9 +160,8 @@ def _plot_split_metrics(
             xlabel=metric,
             ylabel='Score',
         )
-        # TODO: log scale does not work with formatter
-        # ax.yaxis.set_major_formatter(ticker.StrMethodFormatter('{x:.2f}'))
         ax.set_yscale('log')
+        ax.yaxis.set_major_formatter(StrMethodFormatter('{x:.2f}'))
 
         for key, color in zip(metrics[metric], _Defaults.colors):
             ax.plot(
