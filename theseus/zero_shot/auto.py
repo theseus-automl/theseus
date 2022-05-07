@@ -1,8 +1,13 @@
 from pathlib import Path
-from typing import List
+from typing import (
+    List,
+    Optional,
+)
 
 import pandas as pd
 
+from theseus import TextDataset
+from theseus._mixin import AutoEstimatorMixin
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
@@ -12,12 +17,12 @@ from theseus.zero_shot._classifiers import ZeroShotClassifier
 _logger = setup_logger(__name__)
 
 
-class AutoZeroShotClassifier:
+class AutoZeroShotClassifier(AutoEstimatorMixin):
     def __init__(
         self,
-        target_lang: LanguageCode,
         candidate_labels: List[str],
         out_path: Path,
+        target_lang: Optional[LanguageCode] = None,
     ) -> None:
         self._target_lang = target_lang
         self._candidate_labels = candidate_labels
@@ -29,8 +34,14 @@ class AutoZeroShotClassifier:
 
     def fit(
         self,
-        texts: List[str],
+        dataset: TextDataset,
     ) -> None:
+        _logger.info('detecting_language')
+        self._target_lang = self._detect_lang(
+            self._target_lang,
+            dataset.texts,
+        )
+
         try:
             clf = ZeroShotClassifier(
                 self._target_lang,
@@ -41,7 +52,7 @@ class AutoZeroShotClassifier:
         else:
             self._fit_single_model(
                 clf,
-                texts,
+                dataset.texts,
                 self._out_path,
             )
 
