@@ -19,7 +19,7 @@ from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
 from theseus.wrappers.picklable_fast_text import PicklableFastText
 
-_SUPPORTED_LANGS = frozenset((
+FT_SUPPORTED_LANGS = frozenset((
     LanguageCode.JAPANESE,
     LanguageCode.ARAGONESE,
     LanguageCode.KIRGHIZ,
@@ -188,7 +188,7 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
         self,
         target_lang: LanguageCode,
     ) -> None:
-        if target_lang not in _SUPPORTED_LANGS:
+        if target_lang not in FT_SUPPORTED_LANGS:
             raise UnsupportedLanguageError(f'fastText embeddings are not available for {target_lang}')
 
         self.target_lang = target_lang

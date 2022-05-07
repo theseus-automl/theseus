@@ -28,7 +28,7 @@ from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
 
 _MULTILANG_MODEL = 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
-_SUPPORTED_LANGS = MappingProxyType({
+SBERT_SUPPORTED_LANGS = MappingProxyType({
     # Mono-language models
     LanguageCode.ENGLISH: 'sentence-transformers/all-mpnet-base-v2',
 
@@ -96,13 +96,13 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
         target_lang: LanguageCode,
         device: torch.device,
     ) -> None:
-        if target_lang not in _SUPPORTED_LANGS:
+        if target_lang not in SBERT_SUPPORTED_LANGS:
             raise UnsupportedLanguageError(f'BERT embeddings are not available for {target_lang}')
 
         self.target_lang = target_lang
         self.device = device
-        self._tokenizer = AutoTokenizer.from_pretrained(_SUPPORTED_LANGS[self.target_lang])
-        self._model = AutoModel.from_pretrained(_SUPPORTED_LANGS[self.target_lang]).to(self.device)
+        self._tokenizer = AutoTokenizer.from_pretrained(SBERT_SUPPORTED_LANGS[self.target_lang])
+        self._model = AutoModel.from_pretrained(SBERT_SUPPORTED_LANGS[self.target_lang]).to(self.device)
 
         if self.device.type == 'cuda':
             try:
