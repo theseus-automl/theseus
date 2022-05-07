@@ -7,53 +7,26 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 
 TFIDF_GRID = MappingProxyType({
-    'input': ('content',),
-    'encoding': ('utf-8',),
-    'decode_error': ('ignore',),
     'ngram_range': (
         (1, 1),
-        (2, 2),
-        (3, 3),
         (1, 2),
         (1, 3),
         (2, 3),
     ),
     'max_df': np.linspace(
-        start=0,
+        start=0.6,
         stop=1,
-        num=25,
+        num=10,
     ),
     'min_df': np.linspace(
         start=0,
-        stop=1,
-        num=25,
+        stop=0.2,
+        num=5,
     ),
     'max_features': (
         100,
-        150,
         200,
-        250,
         300,
-    ),
-    'binary': (
-        False,
-        True,
-    ),
-    'norm': (
-        'l1',
-        'l2',
-    ),
-    'use_idf': (
-        False,
-        True,
-    ),
-    'smooth_idf': (
-        False,
-        True,
-    ),
-    'sublinear_tf': (
-        False,
-        True,
     ),
 })
 
@@ -79,8 +52,6 @@ CLASSIFIERS = (
                 'newton-cg',
                 'lbfgs',
                 'liblinear',
-                'sag',
-                'saga',
             ),
             'l1_ratio': np.linspace(
                 start=0.1,
