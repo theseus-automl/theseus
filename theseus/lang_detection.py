@@ -20,6 +20,8 @@ class LanguageDetector:
         self,
     ) -> None:
         self._model_path = CACHE_DIR / 'lid.176.bin'
+        self._download_model()
+
         self._model = PicklableFastText(self._model_path)
 
     def __call__(
