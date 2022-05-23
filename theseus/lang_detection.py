@@ -1,69 +1,33 @@
 from collections import Counter
-from pathlib import Path
 from typing import (
-    Any,
-    Dict,
     List,
     Union,
 )
+from urllib.request import urlretrieve
 
-from fasttext import (
-    FastText,
-    load_model,
-)
-
-from theseus.exceptions import ModelNotFoundError
+from theseus._paths import CACHE_DIR
+from theseus.lang_code import LanguageCode
+from theseus.log import setup_logger
+from theseus.wrappers.picklable_fast_text import PicklableFastText
 
 _FT_THRESHOLD = 0
 
-FastText.eprint = lambda _: None
-
-
-class FasttextWrapper:
-    def __init__(
-        self,
-        model_path: Path,
-    ) -> None:
-        self._model_path = model_path
-        self._model = load_model(str(self._model_path))
-
-    def predict(
-        self,
-        *args: Any,
-        **kwargs: Any,
-    ) -> str:
-        return self._model.predict(
-            *args,
-            **kwargs,
-        )
-
-    def __getstate__(
-        self,
-    ) -> Dict[str, Path]:
-        return {'path': self._model_path}
-
-    def __setstate__(
-        self,
-        state: Dict[str, Path],
-    ) -> None:
-        self._model_path = state['path']
-        self._model = load_model(str(self._model_path))
+_logger = setup_logger(__name__)
 
 
 class LanguageDetector:
     def __init__(
         self,
-        model_path: Path,
     ) -> None:
-        if not model_path.exists() or not model_path.is_file():
-            raise ModelNotFoundError('language detection model does not exist or is not a file')
+        self._model_path = CACHE_DIR / 'lid.176.bin'
+        self._download_model()
 
-        self._model = FasttextWrapper(model_path)
+        self._model = PicklableFastText(self._model_path)
 
     def __call__(
         self,
         text: Union[str, List[str]],
-    ) -> str:
+    ) -> LanguageCode:
         if isinstance(text, str):
             text = [text]
 
@@ -72,4 +36,22 @@ class LanguageDetector:
         for pred in self._model.predict(text, threshold=_FT_THRESHOLD, k=1)[0]:
             predictions.update(pred)
 
-        return predictions.most_common(1)[0][0].replace('__label__', '')
+        return LanguageCode(predictions.most_common(1)[0][0].replace('__label__', ''))
+
+    def _download_model(
+        self,
+    ) -> None:
+        url = 'https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin'
+
+        if self._model_path.exists():
+            _logger.debug('language identification model already exists, skipping download')
+        else:
+            _logger.debug(f'trying to download language identification model from {url}')
+
+            self._model_path.touch(exist_ok=True)
+            urlretrieve(
+                url,
+                self._model_path,
+            )
+
+        _logger.debug(f'language identification model is ready to use')

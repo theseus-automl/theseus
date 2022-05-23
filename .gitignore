@@ -7,6 +7,9 @@
 # Jupyter
 *.ipynb
 
+# Test data
+test_dir/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

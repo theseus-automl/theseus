@@ -1,57 +1,59 @@
 from pathlib import Path
-from typing import List
+from typing import (
+    List,
+    Optional,
+)
 
 import pandas as pd
 
+from theseus import TextDataset
+from theseus._mixin import AutoEstimatorMixin
+from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
 from theseus.plotting.classification import plot_class_distribution
-from theseus.validators import ExistingDir
-from theseus.zero_shot._classifiers import (
-    MonolingualZeroShotClassifier,
-    MultilingualZeroShotClassifier,
-    ZeroShotClassifier,
-)
+from theseus.zero_shot._classifiers import ZeroShotClassifier
 
 _logger = setup_logger(__name__)
 
 
-class AutoZeroShotClassifier:
-    _out_path = ExistingDir()
-
+class AutoZeroShotClassifier(AutoEstimatorMixin):
     def __init__(
         self,
         candidate_labels: List[str],
-        lang: LanguageCode,
         out_path: Path,
+        target_lang: Optional[LanguageCode] = None,
     ) -> None:
+        self._target_lang = target_lang
         self._candidate_labels = candidate_labels
-        self._lang = lang
         self._out_path = out_path
+        self._out_path.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
     def fit(
         self,
-        texts: List[str],
+        dataset: TextDataset,
     ) -> None:
-        multi = MultilingualZeroShotClassifier(self._candidate_labels)
-        self._fit_single_model(
-            multi,
-            texts,
-            self._out_path / f'{multi.model_name}',
+        _logger.info('detecting_language')
+        self._target_lang = self._detect_lang(
+            self._target_lang,
+            dataset.texts,
         )
 
         try:
-            mono = MonolingualZeroShotClassifier(
-                self._lang,
+            clf = ZeroShotClassifier(
+                self._target_lang,
                 self._candidate_labels,
             )
-        except ValueError:
-            _logger.error(f'monolingual model for {self._lang} is not available')
+        except UnsupportedLanguageError as err:
+            _logger.error(str(err))
         else:
             self._fit_single_model(
-                mono,
-                texts,
-                self._out_path / f'{mono.model_name}',
+                clf,
+                dataset.texts,
+                self._out_path,
             )
 
     @staticmethod
@@ -60,17 +62,14 @@ class AutoZeroShotClassifier:
         texts: List[str],
         out_path: Path,
     ) -> None:
-        out_path.mkdir(
-            exist_ok=True,
-            parents=True,
-        )
-
         df = pd.DataFrame()
         df['texts'] = texts
         df['labels'] = [model(text) for text in texts]
 
+        df_path = out_path / 'predictions.parquet.gzip'
+        _logger.info(f'saving predictions to {df_path}')
         df.to_parquet(
-            out_path / 'predictions.parquet.gzip',
+            df_path,
             compression='gzip',
         )
 
