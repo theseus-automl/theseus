@@ -17,10 +17,7 @@ from sklearn.metrics import (
 )
 
 from theseus._abc import EmbeddingsEstimator
-from theseus.classification._param_grids import (
-    CLASSIFIERS,
-    TFIDF_GRID,
-)
+from theseus.classification._param_grids import CLASSIFIERS
 from theseus.embedders.bert import (
     BertEmbedder,
     SBERT_SUPPORTED_LANGS,
@@ -30,6 +27,7 @@ from theseus.embedders.fast_text import (
     FT_SUPPORTED_LANGS,
 )
 from theseus.lang_code import LanguageCode
+from theseus.param_grids import TFIDF_GRID
 from theseus.wrappers.dense_tf_idf import DenseTfidfVectorizer
 
 CLASSIFICATION_METRICS = MappingProxyType({
