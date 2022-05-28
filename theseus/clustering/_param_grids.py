@@ -6,9 +6,9 @@ from psutil import cpu_count
 from sklearn.cluster import (
     AffinityPropagation,
     AgglomerativeClustering,
+    KMeans,
     MeanShift,
     MiniBatchKMeans,
-    KMeans,
 )
 
 _SizeRange = namedtuple(
