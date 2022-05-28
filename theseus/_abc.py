@@ -4,6 +4,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import (
     Any,
+    Callable,
     Dict,
     Optional,
     Union,
@@ -52,7 +53,7 @@ class EmbeddingsEstimator(ABC):
         target_lang: LanguageCode,
         out_dir: Path,
         embedder: Any,
-        models: tuple,
+        models: Union[tuple, Callable],
         scoring: Dict[str, _PredictScorer],
         refit: str,
         embedder_param_grid: Optional[Dict[str, Any]] = None,
@@ -77,6 +78,9 @@ class EmbeddingsEstimator(ABC):
         dataset: TextDataset,
     ) -> float:
         result = []
+
+        if callable(self._models):
+            self._models = self._models(len(dataset))
 
         for clf, clf_param_grid in self._models:
             _logger.info(f'trying {clf.__name__}')
@@ -133,7 +137,7 @@ class EmbeddingsEstimator(ABC):
 
             result.append(
                 {
-                    'classifier': grid.best_estimator_,
+                    'estimator': grid.best_estimator_,
                     'best_score': grid.best_score_,
                 },
             )
@@ -143,10 +147,10 @@ class EmbeddingsEstimator(ABC):
             reverse=True,
         )
 
-        raw_model_path = self._out_dir / 'raw_clf.pkl'
+        raw_model_path = self._out_dir / 'raw_estimator.pkl'
         _logger.info(f'saving model to {raw_model_path.resolve()}')
         joblib.dump(
-            result[0]['classifier'],
+            result[0]['estimator'],
             raw_model_path,
         )
 
