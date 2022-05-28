@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Optional
 
+from pytorch_lightning import seed_everything
+
 from theseus._mixin import AutoEstimatorMixin
 from theseus.accelerator import Accelerator
 from theseus.classification.bert_classifier import BertClassifier
@@ -11,6 +13,7 @@ from theseus.classification.embeddings import (
 )
 from theseus.dataset.balancing.balancer import DatasetBalancer
 from theseus.dataset.text_dataset import TextDataset
+from theseus.defaults import RANDOM_STATE
 from theseus.exceptions import DeviceError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
@@ -27,6 +30,8 @@ class AutoClassifier(AutoEstimatorMixin):
         target_lang: Optional[LanguageCode] = None,
         ignore_imbalance: bool = False,
     ) -> None:
+        seed_everything(RANDOM_STATE)
+
         self._out_dir = out_dir
         self._accelerator = accelerator
         self._target_lang = target_lang
