@@ -103,6 +103,7 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
         self.device = device
         self._tokenizer = AutoTokenizer.from_pretrained(SBERT_SUPPORTED_LANGS[self.target_lang])
         self._model = AutoModel.from_pretrained(SBERT_SUPPORTED_LANGS[self.target_lang]).to(self.device)
+        self._model.eval()
 
         if self.device.type == 'cuda':
             try:
@@ -140,7 +141,7 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
         for batch in self._make_batches(texts, self._effective_batch_size):
             embeddings.append(self._encode(batch))
 
-        return torch.stack(embeddings)
+        return torch.stack(embeddings).detach().cpu().numpy()
 
     def _encode(
         self,
