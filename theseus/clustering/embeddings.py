@@ -16,7 +16,7 @@ from sklearn.metrics import (
 )
 
 from theseus._abc import EmbeddingsEstimator
-from theseus.clustering._param_grids import CLUSTERERS
+from theseus.clustering._param_grids import make_param_grid
 from theseus.embedders.bert import (
     BertEmbedder,
     SBERT_SUPPORTED_LANGS,
@@ -49,7 +49,7 @@ class EmbeddingsClusterer(EmbeddingsEstimator, ABC):
             target_lang,
             out_dir,
             embedder,
-            CLUSTERERS,
+            make_param_grid,
             dict(CLUSTERIZATION_METRICS),
             'silhouette',
             embedder_param_grid,
