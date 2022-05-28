@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Optional
 
+from pytorch_lightning import seed_everything
+
 from theseus._mixin import AutoEstimatorMixin
 from theseus.accelerator import Accelerator
 from theseus.clustering.embeddings import (
@@ -9,6 +11,7 @@ from theseus.clustering.embeddings import (
     TfIdfClusterer,
 )
 from theseus.dataset.text_dataset import TextDataset
+from theseus.defaults import RANDOM_STATE
 from theseus.exceptions import DeviceError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
@@ -22,12 +25,12 @@ class AutoClusterer(AutoEstimatorMixin):
         out_dir: Path,
         accelerator: Accelerator,
         target_lang: Optional[LanguageCode] = None,
-        ignore_imbalance: bool = False,
     ) -> None:
+        seed_everything(RANDOM_STATE)
+
         self._out_dir = out_dir
         self._accelerator = accelerator
         self._target_lang = target_lang
-        self._ignore_imbalance = ignore_imbalance
 
         self._out_dir.mkdir(
             exist_ok=True,
@@ -57,7 +60,7 @@ class AutoClusterer(AutoEstimatorMixin):
             tf_idf_path,
         )
         score = clf.fit(dataset)
-        _logger.info(f'best F1 score with TF-IDF: {score:.4f}')
+        _logger.info(f'best silhouette score with TF-IDF: {score:.4f}')
 
         # fasttext
         ft_path = self._out_dir / 'ft'
@@ -71,7 +74,7 @@ class AutoClusterer(AutoEstimatorMixin):
             ft_path,
         )
         score = clf.fit(dataset)
-        _logger.info(f'best F1 score with fastText embeddings: {score:.4f}')
+        _logger.info(f'best silhouette score with fastText embeddings: {score:.4f}')
 
         try:
             device = self._accelerator.select_single_gpu()
@@ -90,4 +93,4 @@ class AutoClusterer(AutoEstimatorMixin):
                 device,
             )
             score = clf.fit(dataset)
-            _logger.info(f'best F1 score with SentenceBERT embeddings: {score:.4f}')
+            _logger.info(f'best silhouette score with SentenceBERT embeddings: {score:.4f}')
