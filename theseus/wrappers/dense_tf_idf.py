@@ -5,7 +5,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 class DenseTfidfVectorizer(TfidfVectorizer):
     def __init__(
         self,
-        **kwargs,
+        ngram_range=(1, 1),
+        max_df=1.0,
+        min_df=1,
+        max_features=None,
     ) -> None:
         super().__init__(
             input='content',
@@ -16,7 +19,11 @@ class DenseTfidfVectorizer(TfidfVectorizer):
             use_idf=True,
             smooth_idf=True,
             sublinear_tf=False,
-            **kwargs,
+            dtype=np.float64,
+            ngram_range=ngram_range,
+            max_df=max_df,
+            min_df=min_df,
+            max_features=max_features,
         )
 
     def transform(
