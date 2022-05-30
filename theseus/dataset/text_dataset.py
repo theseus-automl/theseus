@@ -15,9 +15,6 @@ class TextDataset(Dataset):
         texts: Sequence[str],
         labels: Optional[Sequence[str]] = None,
     ) -> None:
-        if len(texts) != len(labels):
-            raise ValueError(f'length mismatch: found {len(texts)} texts and {len(labels)} labels')
-
         if labels is not None:
             if len(texts) != len(labels):
                 raise ValueError(f'length mismatch: found {len(texts)} texts and {len(labels)} labels')
