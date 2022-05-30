@@ -161,9 +161,9 @@ def _plot_gs_result_by_single_param(
             dtype=float,
         )
     except ValueError:
-        x_axis = np.array(
-            gs_result[target_param].data,
-            dtype=object,
+        x_axis = np.arange(
+            len(gs_result[target_param].data),
+            dtype=float,
         )
 
     if len(x_axis) == 1:
