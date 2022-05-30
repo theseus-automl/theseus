@@ -19,6 +19,7 @@ from sklearn.metrics._scorer import _PredictScorer
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 
+from theseus.cv import make_split
 from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
@@ -27,6 +28,7 @@ from theseus.plotting.classification import (
     plot_gs_result,
     plot_metrics,
 )
+from theseus.plotting.clustering import plot_clustering_results
 from theseus.validators import ExistingDir
 
 _logger = setup_logger(__name__)
@@ -117,8 +119,11 @@ class EmbeddingsEstimator(ABC):
                 dict(param_grid),
                 scoring=self._scoring,
                 refit=self._refit,
+                cv=make_split(dataset),
                 error_score=0,  # to avoid forbidden combinations
                 return_train_score=True,
+                verbose=2,
+                n_jobs=-1,
             )
             grid.fit(
                 dataset.texts,
@@ -153,6 +158,13 @@ class EmbeddingsEstimator(ABC):
             result[0]['estimator'],
             raw_model_path,
         )
+
+        if dataset.labels is None:
+            plot_clustering_results(
+                result[0]['estimator']['emb'].transform(dataset.texts),
+                result[0]['estimator']['clf'].labels_,
+                self._out_dir / 'result.png',
+            )
 
         return result[0]['best_score']
 
