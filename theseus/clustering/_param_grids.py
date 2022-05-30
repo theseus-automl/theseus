@@ -1,4 +1,3 @@
-from collections import namedtuple
 from types import MappingProxyType
 
 import numpy as np
@@ -11,19 +10,9 @@ from sklearn.cluster import (
     MiniBatchKMeans,
 )
 
-_SizeRange = namedtuple(
-    '_SizeRange',
-    'min max',
-)
-
-# everything else is considered as large
-_SMALL_DATASET_SIZE_RANGE = _SizeRange(
-    min=50,
-    max=9999,
-)
-_MEDIUM_DATASET_SIZE_RANGE = _SizeRange(
-    min=10000,
-    max=99999,
+from theseus.cv import (
+    MEDIUM_DATASET_SIZE_RANGE,
+    SMALL_DATASET_SIZE_RANGE,
 )
 
 _AFFINITY_PROPAGATION = (
@@ -49,12 +38,11 @@ def _get_kmeans_num_clusters(
     result = 0
 
     while result <= dataset_size:
+        nums.append(result)
         result = 2 ** exponent
         exponent += 1
 
-        nums.append(result)
-
-    return tuple(nums)
+    return tuple(nums[1:])
 
 
 def _prepare_mean_shift(
@@ -65,7 +53,7 @@ def _prepare_mean_shift(
     return (
         MeanShift,
         MappingProxyType({
-            'max_iter': (1000,),
+            'max_iter': (500,),
             'min_bin_freq': tuple(min_bin_freq),
             'n_jobs': (-1,),
         }),
@@ -88,6 +76,7 @@ def _prepare_agglomerative(
                 0.9,
             ),
             'linkage': ('ward', 'complete', 'average') if is_small else ('single',),
+            'n_clusters': (None,),
         }),
     )
 
@@ -95,10 +84,10 @@ def _prepare_agglomerative(
 def make_param_grid(
     dataset_size: int,
 ) -> tuple:
-    if dataset_size < _SMALL_DATASET_SIZE_RANGE.min:
+    if dataset_size < SMALL_DATASET_SIZE_RANGE.min:
         raise ValueError('your dataset is too small for clustering algorithms')
 
-    if _SMALL_DATASET_SIZE_RANGE.min <= dataset_size <= _SMALL_DATASET_SIZE_RANGE.max:
+    if SMALL_DATASET_SIZE_RANGE.min <= dataset_size <= SMALL_DATASET_SIZE_RANGE.max:
         return (
             _prepare_mean_shift(dataset_size),
             _prepare_agglomerative(True),
@@ -107,7 +96,7 @@ def make_param_grid(
                 KMeans,
                 MappingProxyType({
                     'n_clusters': _get_kmeans_num_clusters(dataset_size),
-                    'max_iter': (1000,),
+                    'max_iter': (300,),
                     'algorithm': (
                         'lloyd',
                         'elkan',
@@ -116,7 +105,7 @@ def make_param_grid(
             ),
         )
 
-    if _MEDIUM_DATASET_SIZE_RANGE.min <= dataset_size <= _MEDIUM_DATASET_SIZE_RANGE.max:
+    if MEDIUM_DATASET_SIZE_RANGE.min <= dataset_size <= MEDIUM_DATASET_SIZE_RANGE.max:
         return (
             _prepare_agglomerative(False),
             _AFFINITY_PROPAGATION,
@@ -124,7 +113,7 @@ def make_param_grid(
                 KMeans,
                 MappingProxyType({
                     'n_clusters': _get_kmeans_num_clusters(dataset_size),
-                    'max_iter': (1000,),
+                    'max_iter': (500,),
                     'algorithm': ('lloyd',),
                 }),
             ),
@@ -135,7 +124,7 @@ def make_param_grid(
             MiniBatchKMeans,
             MappingProxyType({
                 'n_clusters': _get_kmeans_num_clusters(dataset_size),
-                'max_iter': (1000,),
+                'max_iter': (500,),
                 'batch_size': (256 * cpu_count(logical=False),),
             }),
         ),
