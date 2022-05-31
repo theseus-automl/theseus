@@ -21,6 +21,7 @@ def plot_clustering_results(
     compressed.columns = [
         'x',
         'y',
+        'labels',
     ]
 
     fig, ax = plt.subplots()
