@@ -7,10 +7,12 @@ from typing import (
     Callable,
     Dict,
     Optional,
+    Tuple,
     Union,
 )
 
 import joblib
+import numpy as np
 from sklearn.exceptions import (
     ConvergenceWarning,
     FitFailedWarning,
@@ -78,7 +80,7 @@ class EmbeddingsEstimator(ABC):
     def fit(
         self,
         dataset: TextDataset,
-    ) -> float:
+    ) -> Tuple[float, Dict[str, float]]:
         result = []
 
         if callable(self._models):
@@ -144,6 +146,7 @@ class EmbeddingsEstimator(ABC):
                 {
                     'estimator': grid.best_estimator_,
                     'best_score': grid.best_score_,
+                    'metrics': self._collect_metrics(grid.cv_results_),
                 },
             )
 
@@ -166,7 +169,22 @@ class EmbeddingsEstimator(ABC):
                 self._out_dir / 'result.png',
             )
 
-        return result[0]['best_score']
+        return (
+            result[0]['best_score'],
+            result[0]['metrics'],
+        )
+
+    def _collect_metrics(
+        self,
+        gs_result: Dict[str, Any],
+    ) -> Dict[str, float]:
+        best_index = np.nonzero(gs_result[f'rank_test_{self._refit}'] == 1)[0][0]
+        metrics = {}
+
+        for metric in self._scoring:
+            metrics[metric] = gs_result[f'mean_test_{metric}'][best_index]
+
+        return metrics
 
     @staticmethod
     def _add_param_grid_prefix(
@@ -179,3 +197,4 @@ class EmbeddingsEstimator(ABC):
             prefixed[f'{prefix}__{name}'] = options
 
         return prefixed
+
