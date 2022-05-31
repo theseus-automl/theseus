@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Optional
 
 from theseus._mixin import AutoEstimatorMixin
+from theseus.abc.auto_estimator import AutoEstimator
 from theseus.accelerator import Accelerator
 from theseus.classification.bert_classifier import BertClassifier
 from theseus.classification.embeddings import (
@@ -19,7 +20,7 @@ from theseus.plotting.classification import plot_class_distribution
 _logger = setup_logger(__name__)
 
 
-class AutoClassifier(AutoEstimatorMixin):
+class AutoClassifier(AutoEstimator, AutoEstimatorMixin):
     def __init__(
         self,
         out_dir: Path,
@@ -27,15 +28,13 @@ class AutoClassifier(AutoEstimatorMixin):
         target_lang: Optional[LanguageCode] = None,
         ignore_imbalance: bool = False,
     ) -> None:
-        self._out_dir = out_dir
-        self._accelerator = accelerator
-        self._target_lang = target_lang
-        self._ignore_imbalance = ignore_imbalance
-
-        self._out_dir.mkdir(
-            exist_ok=True,
-            parents=True,
+        super().__init__(
+            out_dir,
+            accelerator,
+            target_lang,
         )
+
+        self._ignore_imbalance = ignore_imbalance
 
     def fit(
         self,

@@ -4,12 +4,15 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import (
     Any,
+    Callable,
     Dict,
     Optional,
+    Tuple,
     Union,
 )
 
 import joblib
+import numpy as np
 from sklearn.exceptions import (
     ConvergenceWarning,
     FitFailedWarning,
@@ -18,6 +21,7 @@ from sklearn.metrics._scorer import _PredictScorer
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 
+from theseus.cv import make_split
 from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
@@ -26,6 +30,7 @@ from theseus.plotting.classification import (
     plot_gs_result,
     plot_metrics,
 )
+from theseus.plotting.clustering import plot_clustering_results
 from theseus.validators import ExistingDir
 
 _logger = setup_logger(__name__)
@@ -52,7 +57,7 @@ class EmbeddingsEstimator(ABC):
         target_lang: LanguageCode,
         out_dir: Path,
         embedder: Any,
-        models: tuple,
+        models: Union[tuple, Callable],
         scoring: Dict[str, _PredictScorer],
         refit: str,
         embedder_param_grid: Optional[Dict[str, Any]] = None,
@@ -75,13 +80,16 @@ class EmbeddingsEstimator(ABC):
     def fit(
         self,
         dataset: TextDataset,
-    ) -> float:
+    ) -> Tuple[float, Dict[str, float]]:
         result = []
+
+        if callable(self._models):
+            self._models = self._models(len(dataset))
 
         for clf, clf_param_grid in self._models:
             _logger.info(f'trying {clf.__name__}')
 
-            if dataset.class_weights is None:
+            if dataset.labels is None and dataset.class_weights is None:
                 _logger.info('no class weights will be used')
             else:
                 _logger.info('using class weights for classification')
@@ -113,8 +121,11 @@ class EmbeddingsEstimator(ABC):
                 dict(param_grid),
                 scoring=self._scoring,
                 refit=self._refit,
+                cv=make_split(dataset),
                 error_score=0,  # to avoid forbidden combinations
                 return_train_score=True,
+                verbose=2,
+                n_jobs=-1,
             )
             grid.fit(
                 dataset.texts,
@@ -133,8 +144,9 @@ class EmbeddingsEstimator(ABC):
 
             result.append(
                 {
-                    'classifier': grid.best_estimator_,
+                    'estimator': grid.best_estimator_,
                     'best_score': grid.best_score_,
+                    'metrics': self._collect_metrics(grid.cv_results_),
                 },
             )
 
@@ -143,14 +155,36 @@ class EmbeddingsEstimator(ABC):
             reverse=True,
         )
 
-        raw_model_path = self._out_dir / 'raw_clf.pkl'
+        raw_model_path = self._out_dir / 'raw_estimator.pkl'
         _logger.info(f'saving model to {raw_model_path.resolve()}')
         joblib.dump(
-            result[0]['classifier'],
+            result[0]['estimator'],
             raw_model_path,
         )
 
-        return result[0]['best_score']
+        if dataset.labels is None:
+            plot_clustering_results(
+                result[0]['estimator']['emb'].transform(dataset.texts),
+                result[0]['estimator']['clf'].labels_,
+                self._out_dir / 'result.png',
+            )
+
+        return (
+            result[0]['best_score'],
+            result[0]['metrics'],
+        )
+
+    def _collect_metrics(
+        self,
+        gs_result: Dict[str, Any],
+    ) -> Dict[str, float]:
+        best_index = np.nonzero(gs_result[f'rank_test_{self._refit}'] == 1)[0][0]
+        metrics = {}
+
+        for metric in self._scoring:
+            metrics[metric] = gs_result[f'mean_test_{metric}'][best_index]
+
+        return metrics
 
     @staticmethod
     def _add_param_grid_prefix(

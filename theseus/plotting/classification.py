@@ -3,58 +3,20 @@ from pathlib import Path
 from typing import (
     Any,
     Dict,
-    Optional,
 )
 
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
-from matplotlib.figure import Figure
 from matplotlib.ticker import StrMethodFormatter
 from sklearn.metrics._scorer import _PredictScorer
 
 from theseus.log import setup_logger
+from theseus.plotting.defaults import Defaults
+from theseus.plotting.display import save_fig
 
 _logger = setup_logger(__name__)
-
-
-class _Defaults:
-    dpi = 300
-    rotation = 90
-
-    colors = (
-        'green',
-        'black',
-        'red',
-        'yellow',
-        'cyan',
-        'magenta',
-    )
-    train_test_styles = (
-        (
-            'train',
-            '--',
-        ),
-        (
-            'test',
-            '-',
-        ),
-    )
-
-    annotation_offset = 0.005
-
-    @staticmethod
-    def get_fill_alpha(
-        split: str,
-    ) -> float:
-        return 0.1 if split == 'test' else 0
-
-    @staticmethod
-    def get_plot_alpha(
-        split: str,
-    ) -> float:
-        return 1 if split == 'test' else 0.7
 
 
 def plot_class_distribution(
@@ -67,7 +29,7 @@ def plot_class_distribution(
     count_ax = sns.countplot(x=labels)
     plt.setp(
         count_ax.get_xticklabels(),
-        rotation=_Defaults.rotation,
+        rotation=Defaults.rotation,
     )
     count_ax.set(
         xlabel='Classes',
@@ -100,7 +62,7 @@ def plot_class_distribution(
 
     freq_ax.grid(None)
 
-    _save_fig(
+    save_fig(
         out_path,
         show,
     )
@@ -163,7 +125,7 @@ def _plot_split_metrics(
         ax.set_yscale('log')
         ax.yaxis.set_major_formatter(StrMethodFormatter('{x:.2f}'))
 
-        for key, color in zip(metrics[metric], _Defaults.colors):
+        for key, color in zip(metrics[metric], Defaults.colors):
             ax.plot(
                 gs_result[key],
                 color=color,
@@ -172,7 +134,7 @@ def _plot_split_metrics(
 
         ax.legend(loc='upper right')
 
-    _save_fig(
+    save_fig(
         out_path,
         show,
     )
@@ -199,23 +161,23 @@ def _plot_gs_result_by_single_param(
             dtype=float,
         )
     except ValueError:
-        x_axis = np.array(
-            gs_result[target_param].data,
-            dtype=object,
+        x_axis = np.arange(
+            len(gs_result[target_param].data),
+            dtype=float,
         )
 
     if len(x_axis) == 1:
         _logger.warning(f'param {target_param} has only 1 value, so the plot will be uninformative')
 
-    for scorer, color in zip(sorted(scoring), _Defaults.colors):
-        for sample, style in _Defaults.train_test_styles:
+    for scorer, color in zip(sorted(scoring), Defaults.colors):
+        for sample, style in Defaults.train_test_styles:
             sample_score_mean = gs_result[f'mean_{sample}_{scorer}']
             sample_score_std = gs_result[f'std_{sample}_{scorer}']
             ax.fill_between(
                 x_axis,
                 sample_score_mean - sample_score_std,
                 sample_score_mean + sample_score_std,
-                alpha=_Defaults.get_fill_alpha(sample),
+                alpha=Defaults.get_fill_alpha(sample),
                 color=color,
             )
             ax.plot(
@@ -223,7 +185,7 @@ def _plot_gs_result_by_single_param(
                 sample_score_mean,
                 style,
                 color=color,
-                alpha=_Defaults.get_plot_alpha(sample),
+                alpha=Defaults.get_plot_alpha(sample),
                 label=f'{scorer} ({sample})',
             )
 
@@ -250,37 +212,15 @@ def _plot_gs_result_by_single_param(
             f'{best_score:.2f}',
             (
                 x_axis[best_index],
-                best_score + _Defaults.annotation_offset,
+                best_score + Defaults.annotation_offset,
             ),
         )
 
     plt.legend(loc='best')
     plt.grid(False)
 
-    _save_fig(
+    save_fig(
         out_path,
         show,
         fig,
     )
-
-
-def _save_fig(
-    out_path: Path,
-    show: bool,
-    fig: Optional[Figure] = None,
-) -> None:
-    used_fig = plt if fig is None else fig
-
-    used_fig.savefig(
-        out_path,
-        dpi=_Defaults.dpi,
-        bbox_inches='tight',
-    )
-
-    if show:
-        used_fig.show()
-
-    if isinstance(used_fig, Figure):
-        plt.close(used_fig)
-    else:
-        plt.close()
