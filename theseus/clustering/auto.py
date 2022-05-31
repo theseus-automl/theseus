@@ -1,42 +1,18 @@
-from pathlib import Path
-from typing import Optional
-
-from pytorch_lightning import seed_everything
-
 from theseus._mixin import AutoEstimatorMixin
-from theseus.accelerator import Accelerator
+from theseus.abc.auto_estimator import AutoEstimator
 from theseus.clustering.embeddings import (
     FastTextClusterer,
     SentenceBertClusterer,
     TfIdfClusterer,
 )
 from theseus.dataset.text_dataset import TextDataset
-from theseus.defaults import RANDOM_STATE
 from theseus.exceptions import DeviceError
-from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
 
 _logger = setup_logger(__name__)
 
 
-class AutoClusterer(AutoEstimatorMixin):
-    def __init__(
-        self,
-        out_dir: Path,
-        accelerator: Accelerator,
-        target_lang: Optional[LanguageCode] = None,
-    ) -> None:
-        seed_everything(RANDOM_STATE)
-
-        self._out_dir = out_dir
-        self._accelerator = accelerator
-        self._target_lang = target_lang
-
-        self._out_dir.mkdir(
-            exist_ok=True,
-            parents=True,
-        )
-
+class AutoClusterer(AutoEstimator, AutoEstimatorMixin):
     def fit(
         self,
         dataset: TextDataset,

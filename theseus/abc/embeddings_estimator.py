@@ -89,7 +89,7 @@ class EmbeddingsEstimator(ABC):
         for clf, clf_param_grid in self._models:
             _logger.info(f'trying {clf.__name__}')
 
-            if dataset.class_weights is None:
+            if dataset.labels is None and dataset.class_weights is None:
                 _logger.info('no class weights will be used')
             else:
                 _logger.info('using class weights for classification')
@@ -197,4 +197,3 @@ class EmbeddingsEstimator(ABC):
             prefixed[f'{prefix}__{name}'] = options
 
         return prefixed
-

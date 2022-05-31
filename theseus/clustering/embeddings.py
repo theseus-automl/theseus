@@ -15,7 +15,7 @@ from sklearn.metrics import (
     silhouette_score,
 )
 
-from theseus._abc import EmbeddingsEstimator
+from theseus.abc.embeddings_estimator import EmbeddingsEstimator
 from theseus.clustering._param_grids import make_param_grid
 from theseus.embedders.bert import (
     BertEmbedder,

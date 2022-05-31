@@ -16,7 +16,7 @@ from sklearn.metrics import (
     recall_score,
 )
 
-from theseus._abc import EmbeddingsEstimator
+from theseus.abc.embeddings_estimator import EmbeddingsEstimator
 from theseus.classification._param_grids import CLASSIFIERS
 from theseus.embedders.bert import (
     BertEmbedder,

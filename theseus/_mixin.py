@@ -1,8 +1,9 @@
 from logging import Logger
 from typing import (
+    Dict,
     List,
     Optional,
-    Union, Dict,
+    Union,
 )
 
 from theseus.lang_code import LanguageCode
