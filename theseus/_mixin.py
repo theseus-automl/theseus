@@ -1,7 +1,8 @@
+from logging import Logger
 from typing import (
     List,
     Optional,
-    Union,
+    Union, Dict,
 )
 
 from theseus.lang_code import LanguageCode
@@ -20,3 +21,16 @@ class AutoEstimatorMixin:
             return detector(texts)
         else:
             return target_lang
+
+    @staticmethod
+    def _log_score(
+        logger: Logger,
+        score: float,
+        metrics: Dict[str, float],
+        algorithm: str,
+        refit: str,
+    ) -> None:
+        logger.info(f'best {refit} score with {algorithm}: {score:.4f}')
+
+        for name, metric in metrics.items():
+            logger.info(f'{name:<15} = {metric:.4f}')
