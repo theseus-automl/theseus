@@ -48,7 +48,7 @@ class AutoClusterer(AutoEstimatorMixin):
         )
 
         # tfidf
-        _logger.info('trying TF-IDF classification')
+        _logger.info('trying TF-IDF clustering')
         tf_idf_path = self._out_dir / 'tf-idf'
         tf_idf_path.mkdir(
             parents=True,
@@ -59,10 +59,17 @@ class AutoClusterer(AutoEstimatorMixin):
             self._target_lang,
             tf_idf_path,
         )
-        score = clf.fit(dataset)
-        _logger.info(f'best silhouette score with TF-IDF: {score:.4f}')
+        score, metrics = clf.fit(dataset)
+        self._log_score(
+            _logger,
+            score,
+            metrics,
+            'TF-IDF',
+            'silhouette',
+        )
 
         # fasttext
+        _logger.info('trying fastText clustering')
         ft_path = self._out_dir / 'ft'
         ft_path.mkdir(
             parents=True,
@@ -73,8 +80,14 @@ class AutoClusterer(AutoEstimatorMixin):
             self._target_lang,
             ft_path,
         )
-        score = clf.fit(dataset)
-        _logger.info(f'best silhouette score with fastText embeddings: {score:.4f}')
+        score, metrics = clf.fit(dataset)
+        self._log_score(
+            _logger,
+            score,
+            metrics,
+            'fastText embeddings',
+            'silhouette',
+        )
 
         try:
             device = self._accelerator.select_single_gpu()
@@ -82,6 +95,7 @@ class AutoClusterer(AutoEstimatorMixin):
             _logger.error('no suitable GPU was found, skipping SentenceBERT')
         else:
             # sentence_bert
+            _logger.info('trying SentenceBERT clustering')
             sbert_path = self._out_dir / 'sbert'
             sbert_path.mkdir(
                 parents=True,
@@ -92,5 +106,11 @@ class AutoClusterer(AutoEstimatorMixin):
                 sbert_path,
                 device,
             )
-            score = clf.fit(dataset)
-            _logger.info(f'best silhouette score with SentenceBERT embeddings: {score:.4f}')
+            score, metrics = clf.fit(dataset)
+            self._log_score(
+                _logger,
+                score,
+                metrics,
+                'SentenceBERT embeddings',
+                'silhouette',
+            )
