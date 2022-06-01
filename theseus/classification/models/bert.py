@@ -28,6 +28,7 @@ from transformers import (
 )
 from transformers.modeling_outputs import SequenceClassifierOutput
 
+from theseus.cv import select_test_size
 from theseus.dataset.text_dataset import TextDataset
 
 
@@ -63,7 +64,7 @@ class BertForClassification(pl.LightningModule):
     ) -> None:
         train_indices, val_indices = train_test_split(
             list(range(len(dataset.labels))),
-            test_size=0.2,
+            test_size=select_test_size(len(dataset)),
             stratify=dataset.labels,
         )
         self._train_dataset = torch.utils.data.Subset(

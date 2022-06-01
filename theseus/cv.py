@@ -34,14 +34,14 @@ def make_split(
     if dataset.labels is None:
         splitter = ShuffleSplit(
             n_splits=1,
-            test_size=_select_test_size(len(dataset)),
+            test_size=select_test_size(len(dataset)),
         )
 
         return splitter.split(dataset.texts)
 
     splitter = StratifiedShuffleSplit(
         n_splits=1,
-        test_size=_select_test_size(len(dataset)),
+        test_size=select_test_size(len(dataset)),
     )
 
     return splitter.split(
@@ -50,7 +50,7 @@ def make_split(
     )
 
 
-def _select_test_size(
+def select_test_size(
     dataset_size: int,
 ) -> float:
     if SMALL_DATASET_SIZE_RANGE.min <= dataset_size <= SMALL_DATASET_SIZE_RANGE.max:
