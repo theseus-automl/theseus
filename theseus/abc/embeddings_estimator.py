@@ -62,6 +62,7 @@ class EmbeddingsEstimator(ABC):
         refit: str,
         embedder_param_grid: Optional[Dict[str, Any]] = None,
         supported_languages: Optional[MappingProxyType] = None,
+        n_jobs: int = -1,
     ) -> None:
         if supported_languages is not None and target_lang not in supported_languages:
             raise UnsupportedLanguageError(f'{self.__class__.__name__} is unavailable for {target_lang}')
@@ -76,6 +77,7 @@ class EmbeddingsEstimator(ABC):
         self._scoring = scoring
         self._refit = refit
         self._emb_param_grid = {} if embedder_param_grid is None else embedder_param_grid
+        self._n_jobs = n_jobs
 
     def fit(
         self,
@@ -125,7 +127,7 @@ class EmbeddingsEstimator(ABC):
                 error_score=0,  # to avoid forbidden combinations
                 return_train_score=True,
                 verbose=2,
-                n_jobs=-1,
+                n_jobs=self._n_jobs,
             )
             grid.fit(
                 dataset.texts,

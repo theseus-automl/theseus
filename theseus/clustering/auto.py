@@ -1,4 +1,3 @@
-from theseus._mixin import AutoEstimatorMixin
 from theseus.abc.auto_estimator import AutoEstimator
 from theseus.clustering.embeddings import (
     FastTextClusterer,
@@ -12,16 +11,13 @@ from theseus.log import setup_logger
 _logger = setup_logger(__name__)
 
 
-class AutoClusterer(AutoEstimator, AutoEstimatorMixin):
+class AutoClusterer(AutoEstimator):
     def fit(
         self,
         dataset: TextDataset,
     ) -> None:
         _logger.info('detecting_language')
-        self._target_lang = self._detect_lang(
-            self._target_lang,
-            dataset.texts,
-        )
+        self._detect_lang(dataset.texts)
 
         # tfidf
         _logger.info('trying TF-IDF clustering')
@@ -34,6 +30,7 @@ class AutoClusterer(AutoEstimator, AutoEstimatorMixin):
         clf = TfIdfClusterer(
             self._target_lang,
             tf_idf_path,
+            n_jobs=self._tf_idf_n_jobs,
         )
         score, metrics = clf.fit(dataset)
         self._log_score(
@@ -55,6 +52,7 @@ class AutoClusterer(AutoEstimator, AutoEstimatorMixin):
         clf = FastTextClusterer(
             self._target_lang,
             ft_path,
+            n_jobs=self._fast_text_n_jobs,
         )
         score, metrics = clf.fit(dataset)
         self._log_score(
@@ -81,6 +79,7 @@ class AutoClusterer(AutoEstimator, AutoEstimatorMixin):
                 self._target_lang,
                 sbert_path,
                 device,
+                self._sbert_n_jobs,
             )
             score, metrics = clf.fit(dataset)
             self._log_score(

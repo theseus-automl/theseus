@@ -44,6 +44,7 @@ class EmbeddingsClusterer(EmbeddingsEstimator, ABC):
         embedder: Any,
         embedder_param_grid: Optional[Dict[str, Any]] = None,
         supported_languages: Optional[MappingProxyType] = None,
+        n_jobs: int = -1,
     ) -> None:
         super().__init__(
             target_lang,
@@ -54,6 +55,7 @@ class EmbeddingsClusterer(EmbeddingsEstimator, ABC):
             'silhouette',
             embedder_param_grid,
             supported_languages,
+            n_jobs,
         )
 
 
@@ -62,12 +64,14 @@ class FastTextClusterer(EmbeddingsClusterer):
         self,
         target_lang: LanguageCode,
         out_dir: Path,
+        n_jobs: int = -1,
     ) -> None:
         super().__init__(
             target_lang,
             out_dir,
             FasttextEmbedder(target_lang),
             supported_languages=FT_SUPPORTED_LANGS,
+            n_jobs=n_jobs,
         )
 
 
@@ -77,6 +81,7 @@ class SentenceBertClusterer(EmbeddingsClusterer):
         target_lang: LanguageCode,
         out_dir: Path,
         device: torch.device,
+        n_jobs: int = -1,
     ) -> None:
         super().__init__(
             target_lang,
@@ -86,6 +91,7 @@ class SentenceBertClusterer(EmbeddingsClusterer):
                 device,
             ),
             supported_languages=SBERT_SUPPORTED_LANGS,
+            n_jobs=n_jobs,
         )
 
 
@@ -94,10 +100,12 @@ class TfIdfClusterer(EmbeddingsClusterer):
         self,
         target_lang: LanguageCode,
         out_dir: Path,
+        n_jobs: int = -1,
     ) -> None:
         super().__init__(
             target_lang,
             out_dir,
             DenseTfidfVectorizer(),
             TFIDF_GRID,
+            n_jobs=n_jobs,
         )
