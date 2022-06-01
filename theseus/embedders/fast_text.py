@@ -119,6 +119,7 @@ FT_SUPPORTED_LANGS = frozenset((
     LanguageCode.NEPALI,
     LanguageCode.NEPAL_BHASA,
     LanguageCode.DUTCH,
+    LanguageCode.RUSSIAN,
 ))
 
 _logger = setup_logger(__name__)
@@ -164,7 +165,11 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
         if file.exists():
             _logger.debug(f'model for {self.target_lang} already exists, skipping download')
         else:
-            url = f'https://zenodo.org/record/4905385/files/fasttext-{self.target_lang.value}-mini?download=1'
+            if self.target_lang == LanguageCode.RUSSIAN:
+                url = 'https://github.com/avidale/compress-fasttext/releases/download/gensim-4-draft/geowac_tokens_sg_300_5_2020-100K-20K-100.bin'
+            else:
+                url = f'https://zenodo.org/record/4905385/files/fasttext-{self.target_lang.value}-mini?download=1'
+
             _logger.debug(f'trying to download model for {self.target_lang} from {url}')
 
             urlretrieve(
