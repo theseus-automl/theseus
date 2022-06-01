@@ -6,8 +6,9 @@ from typing import (
 
 import pandas as pd
 
-from theseus import TextDataset
-from theseus._mixin import AutoEstimatorMixin
+from theseus.abc.auto_estimator import AutoEstimator
+from theseus.accelerator import Accelerator
+from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
@@ -17,30 +18,28 @@ from theseus.zero_shot._classifiers import ZeroShotClassifier
 _logger = setup_logger(__name__)
 
 
-class AutoZeroShotClassifier(AutoEstimatorMixin):
+class AutoZeroShotClassifier(AutoEstimator):
     def __init__(
         self,
+        out_dir: Path,
+        accelerator: Accelerator,
         candidate_labels: List[str],
-        out_path: Path,
         target_lang: Optional[LanguageCode] = None,
     ) -> None:
-        self._target_lang = target_lang
-        self._candidate_labels = candidate_labels
-        self._out_path = out_path
-        self._out_path.mkdir(
-            parents=True,
-            exist_ok=True,
+        super().__init__(
+            out_dir,
+            accelerator,
+            target_lang,
         )
+
+        self._candidate_labels = candidate_labels
 
     def fit(
         self,
         dataset: TextDataset,
     ) -> None:
         _logger.info('detecting_language')
-        self._target_lang = self._detect_lang(
-            self._target_lang,
-            dataset.texts,
-        )
+        self._detect_lang(dataset.texts)
 
         try:
             clf = ZeroShotClassifier(
@@ -53,7 +52,7 @@ class AutoZeroShotClassifier(AutoEstimatorMixin):
             self._fit_single_model(
                 clf,
                 dataset.texts,
-                self._out_path,
+                self._out_dir,
             )
 
     @staticmethod

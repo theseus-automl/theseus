@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Optional
 
-from theseus._mixin import AutoEstimatorMixin
 from theseus.abc.auto_estimator import AutoEstimator
 from theseus.accelerator import Accelerator
 from theseus.classification.bert_classifier import BertClassifier
@@ -20,7 +19,7 @@ from theseus.plotting.classification import plot_class_distribution
 _logger = setup_logger(__name__)
 
 
-class AutoClassifier(AutoEstimator, AutoEstimatorMixin):
+class AutoClassifier(AutoEstimator):
     def __init__(
         self,
         out_dir: Path,
@@ -46,10 +45,7 @@ class AutoClassifier(AutoEstimator, AutoEstimatorMixin):
         )
 
         _logger.info('detecting_language')
-        self._target_lang = self._detect_lang(
-            self._target_lang,
-            dataset.texts,
-        )
+        self._detect_lang(dataset.texts)
 
         _logger.info('balancing dataset')
         balancer = DatasetBalancer(
