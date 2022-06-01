@@ -21,12 +21,18 @@ class AutoEstimator:
         out_dir: Path,
         accelerator: Accelerator,
         target_lang: Optional[LanguageCode] = None,
+        tf_idf_n_jobs: int = -1,
+        fast_text_n_jobs: int = 2,
+        sbert_n_jobs: int = 1,
     ) -> None:
         seed_everything(RANDOM_STATE)
 
         self._out_dir = out_dir
         self._accelerator = accelerator
         self._target_lang = target_lang
+        self._tf_idf_n_jobs = tf_idf_n_jobs
+        self._fast_text_n_jobs = fast_text_n_jobs
+        self._sbert_n_jobs = sbert_n_jobs
 
         self._out_dir.mkdir(
             exist_ok=True,

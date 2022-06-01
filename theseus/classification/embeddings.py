@@ -46,6 +46,7 @@ class EmbeddingsClassifier(EmbeddingsEstimator, ABC):
         embedder: Any,
         embedder_param_grid: Optional[Dict[str, Any]] = None,
         supported_languages: Optional[MappingProxyType] = None,
+        n_jobs: int = -1,
     ) -> None:
         super().__init__(
             target_lang,
@@ -56,6 +57,7 @@ class EmbeddingsClassifier(EmbeddingsEstimator, ABC):
             'f1',
             embedder_param_grid,
             supported_languages,
+            n_jobs,
         )
 
 
@@ -64,12 +66,14 @@ class FastTextClassifier(EmbeddingsClassifier):
         self,
         target_lang: LanguageCode,
         out_dir: Path,
+        n_jobs: int = -1,
     ) -> None:
         super().__init__(
             target_lang,
             out_dir,
             FasttextEmbedder(target_lang),
             supported_languages=FT_SUPPORTED_LANGS,
+            n_jobs=n_jobs,
         )
 
 
@@ -79,6 +83,7 @@ class SentenceBertClassifier(EmbeddingsClassifier):
         target_lang: LanguageCode,
         out_dir: Path,
         device: torch.device,
+        n_jobs: int = -1,
     ) -> None:
         super().__init__(
             target_lang,
@@ -88,6 +93,7 @@ class SentenceBertClassifier(EmbeddingsClassifier):
                 device,
             ),
             supported_languages=SBERT_SUPPORTED_LANGS,
+            n_jobs=n_jobs,
         )
 
 
@@ -96,10 +102,12 @@ class TfIdfClassifier(EmbeddingsClassifier):
         self,
         target_lang: LanguageCode,
         out_dir: Path,
+        n_jobs: int = -1,
     ) -> None:
         super().__init__(
             target_lang,
             out_dir,
             DenseTfidfVectorizer(),
             TFIDF_GRID,
+            n_jobs=n_jobs,
         )

@@ -65,6 +65,7 @@ class AutoClassifier(AutoEstimator):
         clf = TfIdfClassifier(
             self._target_lang,
             tf_idf_path,
+            n_jobs=self._tf_idf_n_jobs,
         )
         score = clf.fit(dataset)
         _logger.info(f'best F1 score with TF-IDF: {score:.4f}')
@@ -79,6 +80,7 @@ class AutoClassifier(AutoEstimator):
         clf = FastTextClassifier(
             self._target_lang,
             ft_path,
+            n_jobs=self._fast_text_n_jobs,
         )
         score = clf.fit(dataset)
         _logger.info(f'best F1 score with fastText embeddings: {score:.4f}')
@@ -98,6 +100,7 @@ class AutoClassifier(AutoEstimator):
                 self._target_lang,
                 sbert_path,
                 device,
+                n_jobs=self._sbert_n_jobs,
             )
             score = clf.fit(dataset)
             _logger.info(f'best F1 score with SentenceBERT embeddings: {score:.4f}')
