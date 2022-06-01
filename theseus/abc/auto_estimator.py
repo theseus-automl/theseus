@@ -1,3 +1,4 @@
+from abc import ABC
 from logging import Logger
 from pathlib import Path
 from typing import (
@@ -15,7 +16,7 @@ from theseus.lang_code import LanguageCode
 from theseus.lang_detection import LanguageDetector
 
 
-class AutoEstimator:
+class AutoEstimator(ABC):
     def __init__(
         self,
         out_dir: Path,
