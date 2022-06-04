@@ -1,10 +1,12 @@
 from types import MappingProxyType
 from typing import (
     List,
+    Tuple,
     Union,
 )
 
 import numpy as np
+from tqdm import tqdm
 from transformers import pipeline
 
 from theseus.exceptions import UnsupportedLanguageError
@@ -37,6 +39,8 @@ class ZeroShotClassifier:
         self,
         target_lang: LanguageCode,
         candidate_labels: List[str],
+        device_num: int,
+        batch_size: int,
     ) -> None:
         if target_lang not in _SUPPORTED_LANGS:
             raise UnsupportedLanguageError(f'zero-shot classification is not available for {target_lang}')
@@ -45,14 +49,26 @@ class ZeroShotClassifier:
             'zero-shot-classification',
             model=_SUPPORTED_LANGS[target_lang],
             framework='pt',
+            device=device_num,
         )
         self._candidate_labels = candidate_labels
+        self._batch_size = batch_size
 
     def __call__(
         self,
         texts: Union[str, List[str]],
-    ) -> List[str]:
+    ) -> Tuple[List[str], List[float]]:
         if isinstance(texts, str):
             texts = [texts]
 
-        return [entry['labels'][np.argmax(entry['scores'])] for entry in self._model(texts, self._candidate_labels)]
+        answers = []
+        total_steps = len(texts) // self._batch_size + (len(texts) % self._batch_size > 0)
+
+        for entry in tqdm(self._model(texts, self._candidate_labels, batch_size=self._batch_size), total=total_steps):
+            answer_idx = np.argmax(entry['scores'])
+            answers.append((
+                entry['labels'][answer_idx],
+                entry['scores'][answer_idx],
+            ))
+
+        return zip(*answers)
