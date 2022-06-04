@@ -31,6 +31,7 @@ mypy = "^0.942"
 jupyterlab = "^3.3.3"
 pytest-assume = "^2.4.3"
 autopep8 = "^1.6.0"
+ipywidgets = "^7.7.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
