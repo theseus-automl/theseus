@@ -71,10 +71,7 @@ CLASSIFIERS = (
                 200,
                 300,
             ),
-            'criterion': (
-                'gini',
-                'entropy',
-            ),
+            'criterion': ('gini',),
             'n_jobs': (-1,),
         }),
     ),
