@@ -14,6 +14,9 @@ from theseus import Accelerator
 from theseus.defaults import RANDOM_STATE
 from theseus.lang_code import LanguageCode
 from theseus.lang_detection import LanguageDetector
+from theseus.log import setup_logger
+
+_logger = setup_logger(__name__)
 
 
 class AutoEstimator(ABC):
@@ -48,6 +51,9 @@ class AutoEstimator(ABC):
             detector = LanguageDetector()
 
             self._target_lang = detector(texts)
+            _logger.debug(f'detect language is {self._target_lang}')
+        else:
+            _logger.debug(f'language was set by user to {self._target_lang}')
 
     @staticmethod
     def _log_score(
