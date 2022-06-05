@@ -7,7 +7,6 @@ from typing import (
     Optional,
 )
 
-import torch
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
@@ -18,10 +17,6 @@ from sklearn.metrics import (
 
 from theseus.abc.embeddings_estimator import EmbeddingsEstimator
 from theseus.classification._param_grids import CLASSIFIERS
-from theseus.embedders.bert import (
-    BertEmbedder,
-    SBERT_SUPPORTED_LANGS,
-)
 from theseus.embedders.fast_text import (
     FasttextEmbedder,
     FT_SUPPORTED_LANGS,
@@ -73,26 +68,6 @@ class FastTextClassifier(EmbeddingsClassifier):
             out_dir,
             FasttextEmbedder(target_lang),
             supported_languages=FT_SUPPORTED_LANGS,
-            n_jobs=n_jobs,
-        )
-
-
-class SentenceBertClassifier(EmbeddingsClassifier):
-    def __init__(
-        self,
-        target_lang: LanguageCode,
-        out_dir: Path,
-        device: torch.device,
-        n_jobs: int = -1,
-    ) -> None:
-        super().__init__(
-            target_lang,
-            out_dir,
-            BertEmbedder(
-                target_lang,
-                device,
-            ),
-            supported_languages=SBERT_SUPPORTED_LANGS,
             n_jobs=n_jobs,
         )
 

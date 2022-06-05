@@ -6,7 +6,6 @@ from theseus.accelerator import Accelerator
 from theseus.classification.bert_classifier import BertClassifier
 from theseus.classification.embeddings import (
     FastTextClassifier,
-    SentenceBertClassifier,
     TfIdfClassifier,
 )
 from theseus.dataset.balancing.balancer import DatasetBalancer
@@ -86,25 +85,10 @@ class AutoClassifier(AutoEstimator):
         _logger.info(f'best F1 score with fastText embeddings: {score:.4f}')
 
         try:
-            device = self._accelerator.select_single_gpu()
+            self._accelerator.select_single_gpu()
         except DeviceError:
-            _logger.error('no suitable GPU was found, skipping SentenceBERT & BERT classifier')
+            _logger.error('no suitable GPU was found, skipping BERT classifier')
         else:
-            # sentence_bert
-            sbert_path = self._out_dir / 'sbert'
-            sbert_path.mkdir(
-                parents=True,
-                exist_ok=True,
-            )
-            clf = SentenceBertClassifier(
-                self._target_lang,
-                sbert_path,
-                device,
-                n_jobs=self._sbert_n_jobs,
-            )
-            score = clf.fit(dataset)
-            _logger.info(f'best F1 score with SentenceBERT embeddings: {score:.4f}')
-
             # bert
             bert_path = self._out_dir / 'bert'
             bert_path.mkdir(
