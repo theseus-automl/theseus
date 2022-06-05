@@ -1,4 +1,5 @@
 from pathlib import Path
+from timeit import default_timer as timer
 from typing import Optional
 
 from theseus.abc.auto_estimator import AutoEstimator
@@ -66,7 +67,9 @@ class AutoClassifier(AutoEstimator):
             tf_idf_path,
             n_jobs=self._tf_idf_n_jobs,
         )
+        start = timer()
         score = clf.fit(dataset)
+        _logger.info(f'TFIDF TIME: {timer() - start}')
         _logger.info(f'best F1 score with TF-IDF: {score:.4f}')
 
         # fasttext
@@ -81,7 +84,9 @@ class AutoClassifier(AutoEstimator):
             ft_path,
             n_jobs=self._fast_text_n_jobs,
         )
+        start = timer()
         score = clf.fit(dataset)
+        _logger.info(f'FASTTEXT TIME: {timer() - start}')
         _logger.info(f'best F1 score with fastText embeddings: {score:.4f}')
 
         try:
@@ -102,5 +107,7 @@ class AutoClassifier(AutoEstimator):
                 bert_path,
                 self._accelerator,
             )
+            start = timer()
             score = clf.fit(dataset)
+            _logger.info(f'BERT TIME: {timer() - start}')
             _logger.info(f'best F1 score with BERT classifier: {score:.4f}')
