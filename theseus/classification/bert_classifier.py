@@ -1,3 +1,4 @@
+import pickle
 from pathlib import Path
 from types import MappingProxyType
 
@@ -54,5 +55,14 @@ class BertClassifier:
         )
         trainer.tune(self._model)
         trainer.fit(self._model)
+
+        try:
+            with open(self._out_dir / 'metrics', 'wb') as f:
+                pickle.dump(
+                    self._model.metrics,
+                    f,
+                )
+        except:
+            print('unable to pickle metrics')
 
         return self._model.metrics['val']['f1'].compute().item()
