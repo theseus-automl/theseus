@@ -111,8 +111,6 @@ class Accelerator:
     def select_single_gpu(
         self,
     ) -> torch.device:
-        device_error = DeviceError('no suitable GPU was found')
-
         if self.gpus is None:
             try:
                 gpu_stats = subprocess.check_output([
@@ -140,20 +138,10 @@ class Accelerator:
 
             return torch.device(idx)
 
-        for gpu in self.gpus:
-            device = torch.device(f'cuda:{gpu}')
+        if isinstance(self.gpus, int):
+            return self._check_gpu_availability(self.gpus)
 
-            try:
-                torch.tensor(
-                    [1],
-                    device=device,
-                )
-            except (AssertionError, RuntimeError):
-                raise device_error
-
-            return device
-
-        raise device_error
+        return self._check_gpu_availability(self.gpus[0])
 
     @classmethod
     def from_file(
@@ -180,3 +168,19 @@ class Accelerator:
                     torch.cuda.get_device_name(gpu)
                 except (AssertionError, RuntimeError):
                     raise DeviceError(f'invalid device {gpu}')
+
+    @staticmethod
+    def _check_gpu_availability(
+        device_num: int,
+    ) -> torch.device:
+        device = torch.device(f'cuda:{device_num}')
+
+        try:
+            torch.tensor(
+                [1],
+                device=device,
+            )
+        except (AssertionError, RuntimeError):
+            raise DeviceError(f'CUDA device #{device_num} is not available')
+        else:
+            return device
