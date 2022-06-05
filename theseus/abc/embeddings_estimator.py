@@ -126,7 +126,7 @@ class EmbeddingsEstimator(ABC):
                 cv=make_split(dataset),
                 error_score=0,  # to avoid forbidden combinations
                 return_train_score=True,
-                verbose=2,
+                verbose=1,
                 n_jobs=self._n_jobs,
             )
             grid.fit(
