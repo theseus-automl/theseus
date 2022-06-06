@@ -7,7 +7,6 @@ TFIDF_GRID = MappingProxyType({
         (1, 1),
         (1, 2),
         (1, 3),
-        (2, 3),
     ),
     'max_df': np.linspace(
         start=0.6,

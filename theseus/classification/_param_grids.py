@@ -4,7 +4,6 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
 
 CLASSIFIERS = (
     (
@@ -23,40 +22,12 @@ CLASSIFIERS = (
                 100,
                 1000,
             ),
-            'solver': (
-                'newton-cg',
-                'lbfgs',
-                'liblinear',
-            ),
             'l1_ratio': np.linspace(
                 start=0.1,
                 stop=0.9,
-                num=10,
+                num=5,
             ),
-            'max_iter': (1000,),
-            'n_jobs': (-1,),
-        }),
-    ),
-    (
-        KNeighborsClassifier,
-        MappingProxyType({
-            'n_neighbors': (
-                3,
-                5,
-                7,
-                9,
-            ),
-            'weights': (
-                'uniform',
-                'distance',
-            ),
-            'leaf_size': (
-                10,
-                20,
-                30,
-                40,
-                50,
-            ),
+            'max_iter': (500,),
             'n_jobs': (-1,),
         }),
     ),
