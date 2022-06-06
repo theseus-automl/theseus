@@ -26,22 +26,26 @@ class AutoEstimator(ABC):
         accelerator: Accelerator,
         target_lang: Optional[LanguageCode] = None,
         *,
-        use_tf_idf: bool = True,
-        use_fasttext: bool = True,
-        use_bert: bool = True,
-        tf_idf_n_jobs: int = -1,
-        fast_text_n_jobs: int = -1,
+        use_tf_idf: bool,
+        use_fasttext: bool,
+        use_bert: bool,
+        tf_idf_n_jobs: int,
+        fast_text_n_jobs: int,
+        tf_idf_n_iter: int,
+        fast_text_n_iter: int,
     ) -> None:
         seed_everything(RANDOM_STATE)
 
         self._out_dir = out_dir
         self._accelerator = accelerator
         self._target_lang = target_lang
-        self._tf_idf_n_jobs = tf_idf_n_jobs
-        self._fast_text_n_jobs = fast_text_n_jobs
         self._use_tf_idf = use_tf_idf
         self._use_fasttext = use_fasttext
         self._use_bert = use_bert
+        self._tf_idf_n_jobs = tf_idf_n_jobs
+        self._fast_text_n_jobs = fast_text_n_jobs
+        self._tf_idf_n_iter = tf_idf_n_iter
+        self._fast_text_n_iter = fast_text_n_iter
 
         self._out_dir.mkdir(
             exist_ok=True,

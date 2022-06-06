@@ -42,6 +42,7 @@ class EmbeddingsClassifier(EmbeddingsEstimator, ABC):
         embedder_param_grid: Optional[Dict[str, Any]] = None,
         supported_languages: Optional[MappingProxyType] = None,
         n_jobs: int = -1,
+        n_iter: int = 10,
     ) -> None:
         super().__init__(
             target_lang,
@@ -53,6 +54,7 @@ class EmbeddingsClassifier(EmbeddingsEstimator, ABC):
             embedder_param_grid,
             supported_languages,
             n_jobs,
+            n_iter,
         )
 
 
@@ -62,6 +64,7 @@ class FastTextClassifier(EmbeddingsClassifier):
         target_lang: LanguageCode,
         out_dir: Path,
         n_jobs: int = -1,
+        n_iter: int = 10,
     ) -> None:
         super().__init__(
             target_lang,
@@ -69,6 +72,7 @@ class FastTextClassifier(EmbeddingsClassifier):
             FasttextEmbedder(target_lang),
             supported_languages=FT_SUPPORTED_LANGS,
             n_jobs=n_jobs,
+            n_iter=n_iter,
         )
 
 
@@ -78,6 +82,7 @@ class TfIdfClassifier(EmbeddingsClassifier):
         target_lang: LanguageCode,
         out_dir: Path,
         n_jobs: int = -1,
+        n_iter: int = 10,
     ) -> None:
         super().__init__(
             target_lang,
@@ -85,4 +90,5 @@ class TfIdfClassifier(EmbeddingsClassifier):
             DenseTfidfVectorizer(),
             TFIDF_GRID,
             n_jobs=n_jobs,
+            n_iter=n_iter,
         )

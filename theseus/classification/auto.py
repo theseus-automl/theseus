@@ -32,6 +32,8 @@ class AutoClassifier(AutoEstimator):
         use_bert: bool = True,
         tf_idf_n_jobs: int = -1,
         fast_text_n_jobs: int = -1,
+        tf_idf_n_iter: int = 5,
+        fast_text_n_iter: int = 10,
     ) -> None:
         super().__init__(
             out_dir,
@@ -42,6 +44,8 @@ class AutoClassifier(AutoEstimator):
             use_bert=use_bert,
             tf_idf_n_jobs=tf_idf_n_jobs,
             fast_text_n_jobs=fast_text_n_jobs,
+            tf_idf_n_iter=tf_idf_n_iter,
+            fast_text_n_iter=fast_text_n_iter,
         )
 
         self._ignore_imbalance = ignore_imbalance
@@ -98,6 +102,7 @@ class AutoClassifier(AutoEstimator):
             self._target_lang,
             tf_idf_path,
             n_jobs=self._tf_idf_n_jobs,
+            n_iter=self._tf_idf_n_iter,
         )
         start = timer()
         score, metrics = clf.fit(dataset)
@@ -125,6 +130,7 @@ class AutoClassifier(AutoEstimator):
             self._target_lang,
             ft_path,
             n_jobs=self._fast_text_n_jobs,
+            n_iter=self._tf_idf_n_iter,
         )
         start = timer()
         score, metrics = clf.fit(dataset)
