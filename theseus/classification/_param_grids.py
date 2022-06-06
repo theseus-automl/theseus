@@ -1,6 +1,6 @@
 from types import MappingProxyType
 
-import numpy as np
+from scipy.stats import uniform
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
@@ -15,17 +15,13 @@ CLASSIFIERS = (
                 'elasticnet',
             ),
             'dual': (True,),
-            'C': (
-                0.1,
-                1,
-                10,
-                100,
-                1000,
+            'C': uniform(
+                loc=0.1,
+                scale=1000 - 0.1,
             ),
-            'l1_ratio': np.linspace(
-                start=0.1,
-                stop=0.9,
-                num=5,
+            'l1_ratio': uniform(
+                loc=0.1,
+                scale=0.9 - 0.1,
             ),
             'max_iter': (500,),
             'n_jobs': (-1,),
@@ -34,12 +30,9 @@ CLASSIFIERS = (
     (
         RandomForestClassifier,
         MappingProxyType({
-            'n_estimators': (
-                10,
-                50,
-                100,
-                200,
-                300,
+            'n_estimators': uniform(
+                loc=10,
+                scale=300 - 10,
             ),
             'criterion': ('gini',),
             'n_jobs': (-1,),
@@ -48,11 +41,9 @@ CLASSIFIERS = (
     (
         GaussianNB,
         MappingProxyType({
-            'var_smoothing': (
-                1e-3,
-                1e-6,
-                1e-9,
-                1e-12,
+            'var_smoothing': uniform(
+                loc=1e-3,
+                scale=1e-12 - 1e-3,
             ),
         }),
     ),

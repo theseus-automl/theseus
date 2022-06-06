@@ -1,6 +1,6 @@
 from types import MappingProxyType
 
-import numpy as np
+from scipy.stats import uniform
 
 TFIDF_GRID = MappingProxyType({
     'ngram_range': (
@@ -8,15 +8,13 @@ TFIDF_GRID = MappingProxyType({
         (1, 2),
         (1, 3),
     ),
-    'max_df': np.linspace(
-        start=0.6,
-        stop=1,
-        num=5,
+    'max_df': uniform(
+        loc=0.6,
+        scale=0.4
     ),
-    'min_df': np.linspace(
-        start=0,
-        stop=0.2,
-        num=5,
+    'min_df': uniform(
+        loc=0,
+        scale=0.2,
     ),
     'max_features': (
         100,
