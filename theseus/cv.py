@@ -2,15 +2,17 @@ from collections import namedtuple
 from typing import (
     Any,
     Generator,
+    List,
     Tuple,
+    Union,
 )
 
-from sklearn.model_selection import (
-    ShuffleSplit,
-    StratifiedShuffleSplit,
-)
+from sklearn.model_selection import StratifiedShuffleSplit
 
 from theseus.dataset.text_dataset import TextDataset
+
+_NoSplit = List[Tuple[slice, slice]]
+_StratifiedSplit = Generator[Tuple[Any, Any], Any, None]
 
 _SizeRange = namedtuple(
     '_SizeRange',
@@ -30,14 +32,12 @@ MEDIUM_DATASET_SIZE_RANGE = _SizeRange(
 
 def make_split(
     dataset: TextDataset,
-) -> Generator[Tuple[Any, Any], Any, None]:
+) -> Union[_NoSplit, _StratifiedSplit]:
     if dataset.labels is None:
-        splitter = ShuffleSplit(
-            n_splits=1,
-            test_size=select_test_size(len(dataset)),
-        )
-
-        return splitter.split(dataset.texts)
+        return [(
+            slice(None),
+            slice(None),
+        )]
 
     splitter = StratifiedShuffleSplit(
         n_splits=1,
