@@ -25,12 +25,23 @@ class AutoClassifier(AutoEstimator):
         out_dir: Path,
         accelerator: Accelerator,
         target_lang: Optional[LanguageCode] = None,
+        *,
         ignore_imbalance: bool = False,
+        use_tf_idf: bool = True,
+        use_fasttext: bool = True,
+        use_bert: bool = True,
+        tf_idf_n_jobs: int = -1,
+        fast_text_n_jobs: int = -1,
     ) -> None:
         super().__init__(
             out_dir,
             accelerator,
             target_lang,
+            use_tf_idf=use_tf_idf,
+            use_fasttext=use_fasttext,
+            use_bert=use_bert,
+            tf_idf_n_jobs=tf_idf_n_jobs,
+            fast_text_n_jobs=fast_text_n_jobs,
         )
 
         self._ignore_imbalance = ignore_imbalance
