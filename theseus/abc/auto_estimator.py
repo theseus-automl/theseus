@@ -30,8 +30,7 @@ class AutoEstimator(ABC):
         use_fasttext: bool = True,
         use_bert: bool = True,
         tf_idf_n_jobs: int = -1,
-        fast_text_n_jobs: int = 2,
-        sbert_n_jobs: int = 1,
+        fast_text_n_jobs: int = -1,
     ) -> None:
         seed_everything(RANDOM_STATE)
 
@@ -40,7 +39,6 @@ class AutoEstimator(ABC):
         self._target_lang = target_lang
         self._tf_idf_n_jobs = tf_idf_n_jobs
         self._fast_text_n_jobs = fast_text_n_jobs
-        self._sbert_n_jobs = sbert_n_jobs
         self._use_tf_idf = use_tf_idf
         self._use_fasttext = use_fasttext
         self._use_bert = use_bert
