@@ -18,7 +18,7 @@ from sklearn.exceptions import (
     FitFailedWarning,
 )
 from sklearn.metrics._scorer import _PredictScorer
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 
 from theseus.cv import make_split
@@ -63,6 +63,7 @@ class EmbeddingsEstimator(ABC):
         embedder_param_grid: Optional[Dict[str, Any]] = None,
         supported_languages: Optional[MappingProxyType] = None,
         n_jobs: int = -1,
+        n_iter: int = 10,
     ) -> None:
         if supported_languages is not None and target_lang not in supported_languages:
             raise UnsupportedLanguageError(f'{self.__class__.__name__} is unavailable for {target_lang}')
@@ -78,6 +79,7 @@ class EmbeddingsEstimator(ABC):
         self._refit = refit
         self._emb_param_grid = {} if embedder_param_grid is None else embedder_param_grid
         self._n_jobs = n_jobs
+        self._n_iter = n_iter
 
     def fit(
         self,
@@ -119,9 +121,9 @@ class EmbeddingsEstimator(ABC):
                 'clf',
             ))
 
-            grid = GridSearchCV(
+            grid = RandomizedSearchCV(
                 pipeline,
-                dict(param_grid),
+                param_grid,
                 scoring=self._scoring,
                 refit=self._refit,
                 cv=make_split(dataset),
@@ -129,6 +131,7 @@ class EmbeddingsEstimator(ABC):
                 return_train_score=True,
                 verbose=2,
                 n_jobs=self._n_jobs,
+                n_iter=self._n_iter,
             )
             grid.fit(
                 dataset.texts,
