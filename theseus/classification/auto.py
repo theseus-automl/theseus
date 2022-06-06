@@ -26,9 +26,6 @@ class AutoClassifier(AutoEstimator):
         accelerator: Accelerator,
         target_lang: Optional[LanguageCode] = None,
         ignore_imbalance: bool = False,
-        use_tf_idf: bool = True,
-        use_fasttext: bool = True,
-        use_bert: bool = True,
     ) -> None:
         super().__init__(
             out_dir,
@@ -37,9 +34,6 @@ class AutoClassifier(AutoEstimator):
         )
 
         self._ignore_imbalance = ignore_imbalance
-        self._use_tf_idf = use_tf_idf
-        self._use_fasttext = use_fasttext
-        self._use_bert = use_bert
 
     def fit(
         self,
@@ -72,6 +66,7 @@ class AutoClassifier(AutoEstimator):
         else:
             _logger.warning('skipping fastText')
 
+        # bert
         if self._use_bert:
             self._fit_bert(dataset)
         else:
@@ -94,9 +89,16 @@ class AutoClassifier(AutoEstimator):
             n_jobs=self._tf_idf_n_jobs,
         )
         start = timer()
-        score = clf.fit(dataset)
+        score, metrics = clf.fit(dataset)
         _logger.info(f'TF-IDF took: {timer() - start} seconds')
-        _logger.info(f'best F1 score with TF-IDF: {score:.4f}')
+
+        self._log_score(
+            _logger,
+            score,
+            metrics,
+            'TF-IDF',
+            'F1',
+        )
 
     def _fit_fasttext(
         self,
@@ -114,9 +116,16 @@ class AutoClassifier(AutoEstimator):
             n_jobs=self._fast_text_n_jobs,
         )
         start = timer()
-        score = clf.fit(dataset)
+        score, metrics = clf.fit(dataset)
         _logger.info(f'fastText took: {timer() - start} seconds')
-        _logger.info(f'best F1 score with fastText embeddings: {score:.4f}')
+
+        self._log_score(
+            _logger,
+            score,
+            metrics,
+            'fastText',
+            'F1',
+        )
 
     def _fit_bert(
         self,

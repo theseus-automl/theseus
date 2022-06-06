@@ -25,6 +25,10 @@ class AutoEstimator(ABC):
         out_dir: Path,
         accelerator: Accelerator,
         target_lang: Optional[LanguageCode] = None,
+        *,
+        use_tf_idf: bool = True,
+        use_fasttext: bool = True,
+        use_bert: bool = True,
         tf_idf_n_jobs: int = -1,
         fast_text_n_jobs: int = 2,
         sbert_n_jobs: int = 1,
@@ -37,6 +41,9 @@ class AutoEstimator(ABC):
         self._tf_idf_n_jobs = tf_idf_n_jobs
         self._fast_text_n_jobs = fast_text_n_jobs
         self._sbert_n_jobs = sbert_n_jobs
+        self._use_tf_idf = use_tf_idf
+        self._use_fasttext = use_fasttext
+        self._use_bert = use_bert
 
         self._out_dir.mkdir(
             exist_ok=True,
