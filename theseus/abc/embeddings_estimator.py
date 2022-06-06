@@ -89,13 +89,14 @@ class EmbeddingsEstimator(ABC):
             self._models = self._models(len(dataset))
 
         for clf, clf_param_grid in self._models:
+            _clf_param_grid = dict(clf_param_grid)
             _logger.info(f'trying {clf.__name__}')
 
             if dataset.labels is None and dataset.class_weights is None:
                 _logger.info('no class weights will be used')
             else:
                 _logger.info('using class weights for classification')
-                clf_param_grid['class_weight'] = dataset.class_weights
+                _clf_param_grid['class_weight'] = dataset.class_weights
 
             pipeline = Pipeline(
                 [
@@ -114,7 +115,7 @@ class EmbeddingsEstimator(ABC):
                 'emb',
             )
             param_grid.update(self._add_param_grid_prefix(
-                clf_param_grid,
+                _clf_param_grid,
                 'clf',
             ))
 
@@ -126,7 +127,7 @@ class EmbeddingsEstimator(ABC):
                 cv=make_split(dataset),
                 error_score=0,  # to avoid forbidden combinations
                 return_train_score=True,
-                verbose=1,
+                verbose=2,
                 n_jobs=self._n_jobs,
             )
             grid.fit(
