@@ -12,7 +12,7 @@ TFIDF_GRID = MappingProxyType({
     'max_df': np.linspace(
         start=0.6,
         stop=1,
-        num=10,
+        num=5,
     ),
     'min_df': np.linspace(
         start=0,

@@ -14,7 +14,6 @@ CLASSIFIERS = (
                 'l1',
                 'l2',
                 'elasticnet',
-                'none',
             ),
             'dual': (True,),
             'C': (
