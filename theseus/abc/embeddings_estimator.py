@@ -20,6 +20,7 @@ from sklearn.exceptions import (
 from sklearn.metrics._scorer import _PredictScorer
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 from theseus.cv import make_split
 from theseus.dataset.text_dataset import TextDataset
@@ -31,6 +32,7 @@ from theseus.plotting.classification import (
     plot_metrics,
 )
 from theseus.plotting.clustering import plot_clustering_results
+from theseus.utils import get_args_names
 from theseus.validators import ExistingDir
 
 _logger = setup_logger(__name__)
@@ -94,17 +96,22 @@ class EmbeddingsEstimator(ABC):
             _clf_param_grid = dict(clf_param_grid)
             _logger.info(f'trying {clf.__name__}')
 
-            if dataset.labels is None and dataset.class_weights is None:
-                _logger.info('no class weights will be used')
-            else:
+            if dataset.class_weights is None:
+                if dataset.labels is not None:
+                    _logger.info('no class weights will be used')
+            elif 'class_weight' in get_args_names(clf.__init__):
                 _logger.info('using class weights for classification')
-                _clf_param_grid['class_weight'] = dataset.class_weights
+                _clf_param_grid['class_weight'] = (dataset.class_weights,)  # make tuple for random search
 
             pipeline = Pipeline(
                 [
                     (
                         'emb',
                         self._embedder,
+                    ),
+                    (
+                        'scaler',
+                        StandardScaler(),
                     ),
                     (
                         'clf',
@@ -155,6 +162,8 @@ class EmbeddingsEstimator(ABC):
                     'metrics': self._collect_metrics(grid.cv_results_),
                 },
             )
+
+            print(result[-1])
 
         result.sort(
             key=lambda item: item['best_score'],
