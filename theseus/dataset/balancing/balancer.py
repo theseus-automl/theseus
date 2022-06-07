@@ -65,11 +65,16 @@ class DatasetBalancer:
 
         if sampler is None:
             dataset = deepcopy(dataset)
-            dataset.class_weights = compute_class_weight(
+            classes = np.unique(dataset.labels)
+            weights = compute_class_weight(
                 class_weight='balanced',
-                classes=np.unique(dataset.labels),
+                classes=classes,
                 y=dataset.labels,
             )
+            dataset.class_weights = {}
+
+            for cls, weight in zip(classes, weights):
+                dataset.class_weights[cls] = weight
         else:
             dataset = sampler(dataset)
 
