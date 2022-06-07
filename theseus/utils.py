@@ -4,7 +4,7 @@ from typing import (
     Callable,
     Dict,
     Generator,
-    Sequence,
+    Sequence, List,
 )
 
 import numpy as np
@@ -28,10 +28,16 @@ def chunkify(
             yield chunk
 
 
+def get_args_names(
+    func: Callable,
+) -> List[str]:
+    return [k for k, v in signature(func).parameters.items()]
+
+
 def extract_kwargs(
     func: Callable,
     **kwargs: Any,
 ) -> Dict[str, Any]:
-    args_names = [k for k, v in signature(func).parameters.items()]
+    args_names = get_args_names(func)
 
     return {k: kwargs.pop(k) for k in dict(kwargs) if k in args_names}
