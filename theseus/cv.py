@@ -12,7 +12,6 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from theseus.dataset.text_dataset import TextDataset
 
 _NoSplit = List[Tuple[slice, slice]]
-_StratifiedSplit = Generator[Tuple[Any, Any], Any, None]
 
 _SizeRange = namedtuple(
     '_SizeRange',
@@ -32,7 +31,7 @@ MEDIUM_DATASET_SIZE_RANGE = _SizeRange(
 
 def make_split(
     dataset: TextDataset,
-) -> Union[_NoSplit, _StratifiedSplit]:
+) -> Union[_NoSplit, StratifiedShuffleSplit]:
     if dataset.labels is None:
         return [(
             slice(None),
@@ -44,10 +43,7 @@ def make_split(
         test_size=select_test_size(len(dataset)),
     )
 
-    return splitter.split(
-        dataset.texts,
-        dataset.labels,
-    )
+    return splitter
 
 
 def select_test_size(
