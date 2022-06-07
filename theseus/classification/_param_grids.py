@@ -7,6 +7,7 @@ from scipy.stats import (
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import LinearSVC
 
 CLASSIFIERS = (
     (
@@ -48,6 +49,20 @@ CLASSIFIERS = (
             'var_smoothing': uniform(
                 loc=1e-12,
                 scale=1e-3 - 1e-12,
+            ),
+        }),
+    ),
+    (
+        LinearSVC,
+        MappingProxyType({
+            'penalty': (
+                'l1',
+                'l2',
+            ),
+            'dual': (False,),
+            'C': uniform(
+                loc=0.1,
+                scale=1000 - 0.1,
             ),
         }),
     ),
