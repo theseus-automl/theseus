@@ -20,7 +20,6 @@ from sklearn.exceptions import (
 from sklearn.metrics._scorer import _PredictScorer
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 
 from theseus.cv import make_split
 from theseus.dataset.text_dataset import TextDataset
@@ -108,10 +107,6 @@ class EmbeddingsEstimator(ABC):
                     (
                         'emb',
                         self._embedder,
-                    ),
-                    (
-                        'scaler',
-                        StandardScaler(),
                     ),
                     (
                         'clf',
