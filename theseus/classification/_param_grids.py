@@ -1,6 +1,9 @@
 from types import MappingProxyType
 
-from scipy.stats import uniform, randint
+from scipy.stats import (
+    randint,
+    uniform,
+)
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB

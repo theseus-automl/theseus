@@ -4,7 +4,8 @@ from typing import (
     Callable,
     Dict,
     Generator,
-    Sequence, List,
+    List,
+    Sequence,
 )
 
 import numpy as np

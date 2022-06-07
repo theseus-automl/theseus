@@ -62,7 +62,7 @@ class BertClassifier:
                     self._model.metrics,
                     f,
                 )
-        except:
+        except BaseException:
             print('unable to pickle metrics')
 
         return self._model.metrics['val']['f1'].compute().item()
