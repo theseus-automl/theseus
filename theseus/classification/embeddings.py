@@ -27,9 +27,18 @@ from theseus.wrappers.dense_tf_idf import DenseTfidfVectorizer
 
 CLASSIFICATION_METRICS = MappingProxyType({
     'accuracy': make_scorer(accuracy_score),
-    'f1': make_scorer(f1_score),
-    'precision': make_scorer(precision_score),
-    'recall': make_scorer(recall_score),
+    'f1': make_scorer(
+        f1_score,
+        average='micro',
+    ),
+    'precision': make_scorer(
+        precision_score,
+        average='micro',
+    ),
+    'recall': make_scorer(
+        recall_score,
+        average='micro',
+    ),
 })
 
 
