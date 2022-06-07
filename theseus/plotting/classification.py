@@ -18,6 +18,11 @@ from theseus.plotting.display import save_fig
 
 _logger = setup_logger(__name__)
 
+_PARAM_BLACKLIST = frozenset({
+    'n_jobs',
+    'class_weight',
+})
+
 
 def plot_class_distribution(
     labels: pd.Series,
@@ -75,7 +80,7 @@ def plot_gs_result(
     show: bool = False,
 ) -> None:
     for key in gs_result:
-        if key.startswith('param_'):
+        if key.startswith('param_') and not any(bs in key for bs in _PARAM_BLACKLIST):
             _plot_gs_result_by_single_param(
                 gs_result,
                 scoring,
