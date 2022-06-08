@@ -1,4 +1,5 @@
 import re
+import warnings
 from typing import (
     Any,
     Iterable,
@@ -18,6 +19,11 @@ from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
 from theseus.stop_words import STOP_WORDS
+
+warnings.simplefilter(
+    'ignore',
+    RuntimeWarning,
+)
 
 FT_SUPPORTED_LANGS = frozenset((
     LanguageCode.AFRIKAANS,
@@ -140,7 +146,7 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
 
         self._download_model()
         self._model = CompressedFastTextKeyedVectors.load(str(CACHE_DIR / self._model_name))
-        self._token_regex = re.compile(r'[а-яё]+')
+        self._token_regex = re.compile(r'(?u)\b\w\w+\b')
         self._stop_words = STOP_WORDS.get(
             self.target_lang,
             set(),
@@ -161,7 +167,17 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
         if isinstance(texts, str):
             texts = [texts]
 
-        return np.asarray([self._model.get_sentence_vector(self._preprocess(entry)) for entry in texts])
+        embeddings = []
+
+        for entry in texts:
+            entry = self._preprocess(entry)
+
+            if entry:
+                embeddings.append(np.nan_to_num(self._model.get_sentence_vector(entry)))
+            else:
+                embeddings.append(np.zeros(300))
+
+        return np.asarray(embeddings)
 
     def _download_model(
         self,
