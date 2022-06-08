@@ -1,3 +1,4 @@
+import re
 from typing import (
     Any,
     Iterable,
@@ -16,6 +17,7 @@ from theseus._paths import CACHE_DIR
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
+from theseus.stop_words import STOP_WORDS
 
 FT_SUPPORTED_LANGS = frozenset((
     LanguageCode.AFRIKAANS,
@@ -138,6 +140,11 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
 
         self._download_model()
         self._model = CompressedFastTextKeyedVectors.load(str(CACHE_DIR / self._model_name))
+        self._token_regex = re.compile(r'[а-яё]+')
+        self._stop_words = STOP_WORDS.get(
+            self.target_lang,
+            set(),
+        )
 
     def fit(
         self,
@@ -154,7 +161,7 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
         if isinstance(texts, str):
             texts = [texts]
 
-        return np.asarray([self._model.get_sentence_vector(entry) for entry in texts])
+        return np.asarray([self._model.get_sentence_vector(self._preprocess(entry)) for entry in texts])
 
     def _download_model(
         self,
@@ -180,3 +187,16 @@ class FasttextEmbedder(BaseEstimator, TransformerMixin):
             _logger.debug(f'model for {self.target_lang} successfully downloaded')
 
         _logger.debug(f'model for {self.target_lang} is ready to use')
+
+    def _preprocess(
+        self,
+        text: str,
+    ) -> str:
+        text = text.strip().lower()
+        words = []
+
+        for word in self._token_regex.findall(text):
+            if word not in self._stop_words:
+                words.append(word)
+
+        return ' '.join(words)
