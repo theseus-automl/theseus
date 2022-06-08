@@ -48,6 +48,7 @@ class BertForClassification(pl.LightningModule):
         self._tokenizer = BertTokenizer.from_pretrained(model_name_or_path)
 
         self.lr = None
+        self.learning_rate = None
         self.batch_size = None
         self._train_dataset = None
         self._val_dataset = None
