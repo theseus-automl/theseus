@@ -9,6 +9,7 @@ import numpy as np
 from tqdm import tqdm
 from transformers import pipeline
 
+from theseus._inference import gc_with_cuda
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 
@@ -72,3 +73,9 @@ class ZeroShotClassifier:
             ))
 
         return zip(*answers)
+
+    def __del__(
+        self,
+    ) -> None:
+        self._model.model.to('cpu')
+        gc_with_cuda()
