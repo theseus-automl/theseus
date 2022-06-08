@@ -103,7 +103,7 @@ class Accelerator:
                 name,
             )
 
-            if not name.startswith('__') and not inspect.ismethod(attr):
+            if not name.startswith('_') and not inspect.ismethod(attr):
                 attrs[name] = attr
 
         return attrs
