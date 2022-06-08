@@ -155,10 +155,9 @@ class EmbeddingsEstimator(ABC):
                     'estimator': grid.best_estimator_,
                     'best_score': grid.best_score_,
                     'metrics': self._collect_metrics(grid.cv_results_),
+                    'cv_results': grid.cv_results_,
                 },
             )
-
-            print(result[-1])
 
         result.sort(
             key=lambda item: item['best_score'],
@@ -170,6 +169,13 @@ class EmbeddingsEstimator(ABC):
         joblib.dump(
             result[0]['estimator'],
             raw_model_path,
+        )
+
+        cv_results_path = self._out_dir / 'cv_results.pkl'
+        _logger.info(f'saving CV results to {cv_results_path.resolve()}')
+        joblib.dump(
+            result,
+            cv_results_path,
         )
 
         if dataset.labels is None:
