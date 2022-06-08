@@ -55,7 +55,7 @@ class AutoClassifier(AutoEstimator):
         dataset: TextDataset,
     ) -> None:
         plot_class_distribution(
-            dataset.labels,
+            dataset.le.inverse_transform(dataset.labels),
             self._out_dir / 'class_distribution.png',
         )
 
@@ -67,7 +67,9 @@ class AutoClassifier(AutoEstimator):
             self._target_lang,
             self._ignore_imbalance,
         )
+        start = timer()
         dataset = balancer(dataset)
+        _logger.info(f'dataset balancing took: {timer() - start} seconds')
 
         # tfidf
         if self._use_tf_idf:
@@ -130,7 +132,7 @@ class AutoClassifier(AutoEstimator):
             self._target_lang,
             ft_path,
             n_jobs=self._fast_text_n_jobs,
-            n_iter=self._tf_idf_n_iter,
+            n_iter=self._fast_text_n_iter,
         )
         start = timer()
         score, metrics = clf.fit(dataset)
