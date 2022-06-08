@@ -91,6 +91,14 @@ class EmbeddingsEstimator(ABC):
         if callable(self._models):
             self._models = self._models(len(dataset))
 
+        # if self._n_iter < len(self._models):
+        #     raise ValueError('n_iter can not be smaller than number of classifiers')
+        #
+        # if self._n_iter % len(self._models) != 0:
+        #     raise ValueError(f'n_iter must be divisible by {len(self._models)}')
+        #
+        # self._n_iter %= len(self._models)
+
         for clf, clf_param_grid in self._models:
             _clf_param_grid = dict(clf_param_grid)
             _logger.info(f'trying {clf.__name__}')
