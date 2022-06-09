@@ -38,7 +38,7 @@ def load_imdb(
 if __name__ == '__main__':
     df = load_imdb(Path(argv[1]))
     base_dir = Path(argv[2])
-    batch_size = Path(argv[3])
+    batch_size = int(argv[3])
     accelerator = Accelerator(gpus=0)
 
     candidate_labels = [
