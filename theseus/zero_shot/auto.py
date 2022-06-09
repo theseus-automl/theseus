@@ -34,6 +34,13 @@ class AutoZeroShotClassifier(AutoEstimator):
             out_dir,
             accelerator,
             target_lang,
+            use_tf_idf=None,
+            use_fasttext=None,
+            use_bert=None,
+            tf_idf_n_jobs=None,
+            fast_text_n_jobs=None,
+            tf_idf_n_iter=None,
+            fast_text_n_iter=None,
         )
 
         self._batch_size = batch_size
