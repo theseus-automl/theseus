@@ -20,6 +20,26 @@ class AutoClusterer(AutoEstimator):
         self._detect_lang(dataset.texts)
 
         # tfidf
+        if self._use_tf_idf:
+            self._fit_tf_idf(dataset)
+        else:
+            _logger.warning('skipping TF-IDF')
+
+        # fasttext
+        if self._use_fasttext:
+            self._fit_fast_text(dataset)
+        else:
+            _logger.warning('skipping fastText')
+
+        if self._use_bert:
+            self._fit_bert(dataset)
+        else:
+            _logger.warning('skipping SBERT')
+
+    def _fit_tf_idf(
+        self,
+        dataset: TextDataset,
+    ) -> None:
         _logger.info('trying TF-IDF clustering')
         tf_idf_path = self._out_dir / 'tf-idf'
         tf_idf_path.mkdir(
@@ -41,7 +61,10 @@ class AutoClusterer(AutoEstimator):
             'silhouette',
         )
 
-        # fasttext
+    def _fit_fast_text(
+        self,
+        dataset: TextDataset,
+    ) -> None:
         _logger.info('trying fastText clustering')
         ft_path = self._out_dir / 'ft'
         ft_path.mkdir(
@@ -63,6 +86,10 @@ class AutoClusterer(AutoEstimator):
             'silhouette',
         )
 
+    def _fit_bert(
+        self,
+        dataset: TextDataset,
+    ) -> None:
         try:
             device = self._accelerator.select_single_gpu()
         except DeviceError:

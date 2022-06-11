@@ -90,6 +90,7 @@ class EmbeddingsClusterer(EmbeddingsEstimator, ABC):
         embedder_param_grid: Optional[Dict[str, Any]] = None,
         supported_languages: Optional[MappingProxyType] = None,
         n_jobs: int = -1,
+        n_iter: int = 5,
     ) -> None:
         super().__init__(
             target_lang,
@@ -101,6 +102,7 @@ class EmbeddingsClusterer(EmbeddingsEstimator, ABC):
             embedder_param_grid,
             supported_languages,
             n_jobs,
+            n_iter,
         )
 
 
@@ -110,6 +112,7 @@ class FastTextClusterer(EmbeddingsClusterer):
         target_lang: LanguageCode,
         out_dir: Path,
         n_jobs: int = -1,
+        n_iter: int = 5,
     ) -> None:
         super().__init__(
             target_lang,
@@ -117,6 +120,7 @@ class FastTextClusterer(EmbeddingsClusterer):
             FasttextEmbedder(target_lang),
             supported_languages=FT_SUPPORTED_LANGS,
             n_jobs=n_jobs,
+            n_iter=n_iter,
         )
 
 
@@ -127,6 +131,7 @@ class SentenceBertClusterer(EmbeddingsClusterer):
         out_dir: Path,
         device: torch.device,
         n_jobs: int = -1,
+        n_iter: int = 5,
     ) -> None:
         super().__init__(
             target_lang,
@@ -137,6 +142,7 @@ class SentenceBertClusterer(EmbeddingsClusterer):
             ),
             supported_languages=SBERT_SUPPORTED_LANGS,
             n_jobs=n_jobs,
+            n_iter=n_iter,
         )
 
 
@@ -146,6 +152,7 @@ class TfIdfClusterer(EmbeddingsClusterer):
         target_lang: LanguageCode,
         out_dir: Path,
         n_jobs: int = -1,
+        n_iter: int = 5,
     ) -> None:
         super().__init__(
             target_lang,
@@ -153,4 +160,5 @@ class TfIdfClusterer(EmbeddingsClusterer):
             DenseTfidfVectorizer(),
             TFIDF_GRID,
             n_jobs=n_jobs,
+            n_iter=n_iter,
         )

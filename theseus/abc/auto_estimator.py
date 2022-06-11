@@ -33,6 +33,8 @@ class AutoEstimator(ABC):
         fast_text_n_jobs: int,
         tf_idf_n_iter: int,
         fast_text_n_iter: int,
+        sbert_n_jobs: int = -1,
+        sbert_n_iter: int = 50,
     ) -> None:
         seed_everything(RANDOM_STATE)
 
@@ -46,6 +48,8 @@ class AutoEstimator(ABC):
         self._fast_text_n_jobs = fast_text_n_jobs
         self._tf_idf_n_iter = tf_idf_n_iter
         self._fast_text_n_iter = fast_text_n_iter
+        self._sbert_n_jobs = sbert_n_jobs
+        self._sbert_n_iter = sbert_n_iter
 
         self._out_dir.mkdir(
             exist_ok=True,
