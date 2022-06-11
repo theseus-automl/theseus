@@ -137,7 +137,7 @@ class EmbeddingsEstimator(ABC):
                 scoring=self._scoring,
                 refit=self._refit,
                 cv=make_split(dataset),
-                error_score=0,  # to avoid forbidden combinations
+                error_score=-100,  # to avoid forbidden combinations
                 return_train_score=True,
                 verbose=2,
                 n_jobs=self._n_jobs,
@@ -148,15 +148,15 @@ class EmbeddingsEstimator(ABC):
                 dataset.labels,
             )
 
-            plot_gs_result(
-                grid.cv_results_,
-                self._scoring,
-                self._out_dir,
-            )
-            plot_metrics(
-                grid.cv_results_,
-                self._out_dir,
-            )
+            # plot_gs_result(
+            #     grid.cv_results_,
+            #     self._scoring,
+            #     self._out_dir,
+            # )
+            # plot_metrics(
+            #     grid.cv_results_,
+            #     self._out_dir,
+            # )
 
             result.append(
                 {
