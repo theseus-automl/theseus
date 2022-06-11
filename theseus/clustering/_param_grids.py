@@ -2,6 +2,10 @@ from types import MappingProxyType
 
 import numpy as np
 from psutil import cpu_count
+from scipy.stats import (
+    randint,
+    uniform,
+)
 from sklearn.cluster import (
     AffinityPropagation,
     AgglomerativeClustering,
@@ -19,12 +23,9 @@ _AFFINITY_PROPAGATION = (
     AffinityPropagation,
     MappingProxyType({
         'max_iter': (1000,),
-        'damping': (
-            0.5,
-            0.6,
-            0.7,
-            0.8,
-            0.9,
+        'damping': uniform(
+            loc=0.5,
+            scale=0.9 - 0.5,
         ),
     }),
 )
@@ -32,7 +33,7 @@ _AFFINITY_PROPAGATION = (
 
 def _get_kmeans_num_clusters(
     dataset_size: int,
-) -> tuple:
+):
     nums = []
     exponent = 1
     result = 0
@@ -42,7 +43,10 @@ def _get_kmeans_num_clusters(
         result = 2 ** exponent
         exponent += 1
 
-    return tuple(nums[1:])
+    return randint(
+        low=2,
+        high=nums[-1],
+    )
 
 
 def _prepare_mean_shift(
@@ -54,7 +58,10 @@ def _prepare_mean_shift(
         MeanShift,
         MappingProxyType({
             'max_iter': (500,),
-            'min_bin_freq': tuple(min_bin_freq),
+            'min_bin_freq': randint(
+                low=min_bin_freq[0],
+                high=min_bin_freq[-1],
+            ),
             'n_jobs': (-1,),
         }),
     )
@@ -70,10 +77,9 @@ def _prepare_agglomerative(
                 'euclidean',
                 'cosine',
             ),
-            'distance_threshold': (
-                0.5,
-                0.7,
-                0.9,
+            'distance_threshold': uniform(
+                loc=0.5,
+                scale=0.9 - 0.5,
             ),
             'linkage': ('ward', 'complete', 'average') if is_small else ('single',),
             'n_clusters': (None,),
