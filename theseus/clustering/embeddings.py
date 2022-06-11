@@ -11,7 +11,6 @@ import torch
 from sklearn.metrics import (
     calinski_harabasz_score,
     davies_bouldin_score,
-    make_scorer,
     silhouette_score,
 )
 
@@ -29,10 +28,56 @@ from theseus.lang_code import LanguageCode
 from theseus.param_grids import TFIDF_GRID
 from theseus.wrappers.dense_tf_idf import DenseTfidfVectorizer
 
+
+def _modified_silhouette_score(
+    estimator,
+    data,
+) -> float:
+    estimator.fit_predict(data)
+
+    try:
+        return silhouette_score(
+            estimator['emb'].transform(data),
+            estimator['clf'].labels_,
+        )
+    except ValueError:
+        return -1.0
+
+
+def _modified_calinski_harabasz_score(
+    estimator,
+    data,
+) -> float:
+    estimator.fit_predict(data)
+
+    try:
+        return calinski_harabasz_score(
+            estimator['emb'].transform(data),
+            estimator['clf'].labels_,
+        )
+    except ValueError:
+        return 0.0
+
+
+def _modified_davies_bouldin_score(
+    estimator,
+    data,
+) -> float:
+    estimator.fit_predict(data)
+
+    try:
+        return davies_bouldin_score(
+            estimator['emb'].transform(data),
+            estimator['clf'].labels_,
+        )
+    except ValueError:
+        return 1e+9
+
+
 CLUSTERIZATION_METRICS = MappingProxyType({
-    'silhouette': make_scorer(silhouette_score),
-    'chs': make_scorer(calinski_harabasz_score),
-    'dbs': make_scorer(davies_bouldin_score),
+    'silhouette': _modified_silhouette_score,
+    'chs': _modified_calinski_harabasz_score,
+    'dbs': _modified_davies_bouldin_score,
 })
 
 
