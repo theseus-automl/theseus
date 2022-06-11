@@ -51,6 +51,7 @@ class AutoClusterer(AutoEstimator):
             self._target_lang,
             tf_idf_path,
             n_jobs=self._tf_idf_n_jobs,
+            n_iter=self._tf_idf_n_iter,
         )
         score, metrics = clf.fit(dataset)
         self._log_score(
@@ -76,6 +77,7 @@ class AutoClusterer(AutoEstimator):
             self._target_lang,
             ft_path,
             n_jobs=self._fast_text_n_jobs,
+            n_iter=self._fast_text_n_iter,
         )
         score, metrics = clf.fit(dataset)
         self._log_score(
@@ -106,7 +108,8 @@ class AutoClusterer(AutoEstimator):
                 self._target_lang,
                 sbert_path,
                 device,
-                self._sbert_n_jobs,
+                n_jobs=self._sbert_n_jobs,
+                n_iter=self._sbert_n_iter,
             )
             score, metrics = clf.fit(dataset)
             self._log_score(
