@@ -55,6 +55,7 @@ class BertClassifier:
             **self._accelerator_params,
         )
 
+        trainer.tuner.scale_batch_size(self._model)
         lr_finder = trainer.tuner.lr_find(
             self._model,
             min_lr=1e-8,
@@ -66,8 +67,6 @@ class BertClassifier:
             lr_finder.plot(suggest=True),
         )
 
-        trainer.tuner.scale_batch_size(self._model)
-
         print(self._model.batch_size)
 
         trainer.fit(self._model)
@@ -78,7 +77,7 @@ class BertClassifier:
                     self._model.metrics,
                     f,
                 )
-        except BaseException:
+        except Exception:
             print('unable to pickle metrics')
 
         return self._model.metrics['val']['f1'].compute().item()
