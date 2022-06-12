@@ -114,7 +114,6 @@ def make_param_grid(
     if MEDIUM_DATASET_SIZE_RANGE.min <= dataset_size <= MEDIUM_DATASET_SIZE_RANGE.max:
         return (
             _prepare_agglomerative(False),
-            _AFFINITY_PROPAGATION,
             (
                 KMeans,
                 MappingProxyType({
