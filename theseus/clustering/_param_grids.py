@@ -43,10 +43,7 @@ def _get_kmeans_num_clusters(
         result = 2 ** exponent
         exponent += 1
 
-    return randint(
-        low=2,
-        high=nums[-1],
-    )
+    return tuple(nums[1:])
 
 
 def _prepare_mean_shift(
