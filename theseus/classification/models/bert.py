@@ -31,6 +31,8 @@ from transformers.modeling_outputs import SequenceClassifierOutput
 from theseus.cv import select_test_size
 from theseus.dataset.text_dataset import TextDataset
 
+_START_LR = 1e-8
+
 
 class BertForClassification(pl.LightningModule):
     def __init__(
@@ -47,8 +49,7 @@ class BertForClassification(pl.LightningModule):
         )
         self._tokenizer = BertTokenizer.from_pretrained(model_name_or_path)
 
-        self.lr = None
-        self.learning_rate = None
+        self.learning_rate = _START_LR
         self.batch_size = None
         self._train_dataset = None
         self._val_dataset = None
@@ -83,7 +84,7 @@ class BertForClassification(pl.LightningModule):
     ) -> Optimizer:
         return AdamW(
             self._model.parameters(),
-            lr=self.lr or self.learning_rate,
+            lr=self.learning_rate,
             amsgrad=True,
         )
 
