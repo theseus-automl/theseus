@@ -48,21 +48,28 @@ class BertClassifier:
         )
         trainer = pl.Trainer(
             logger=logger,
-            auto_scale_batch_size='power',
-            auto_lr_find=True,
+            # auto_scale_batch_size='power',
+            # auto_lr_find=True,
             max_epochs=_MAX_EPOCHS,
             deterministic=True,
             **self._accelerator_params,
         )
 
-        lr_finder = trainer.tuner.lr_find(self._model)
+        lr_finder = trainer.tuner.lr_find(
+            self._model,
+            min_lr=1e-8,
+            max_lr=1e-5,
+        )
         save_fig(
             self._out_dir / 'lr_tuner.png',
             False,
             lr_finder.plot(suggest=True),
         )
 
-        trainer.tune(self._model)
+        trainer.tuner.scale_batch_size(self._model)
+
+        print(self._model.batch_size)
+
         trainer.fit(self._model)
 
         try:

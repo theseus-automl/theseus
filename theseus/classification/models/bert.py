@@ -50,7 +50,7 @@ class BertForClassification(pl.LightningModule):
         self._tokenizer = BertTokenizer.from_pretrained(model_name_or_path)
 
         self.learning_rate = _START_LR
-        self.batch_size = None
+        self.batch_size = 1
         self._train_dataset = None
         self._val_dataset = None
         self._class_weights = None
@@ -157,6 +157,7 @@ class BertForClassification(pl.LightningModule):
             shuffle=True,
             num_workers=os.cpu_count(),
             collate_fn=self._collate_fn,
+            batch_size=self.batch_size,
         )
 
     def val_dataloader(
@@ -167,6 +168,7 @@ class BertForClassification(pl.LightningModule):
             shuffle=False,
             num_workers=os.cpu_count(),
             collate_fn=self._collate_fn,
+            batch_size=self.batch_size,
         )
 
     def _calculate_metrics(
