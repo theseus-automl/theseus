@@ -9,6 +9,7 @@ from theseus.classification.models.bert import BertForClassification
 from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
+from theseus.plotting.display import save_fig
 
 _SUPPORTED_LANGS = MappingProxyType({
     LanguageCode.RUSSIAN: 'DeepPavlov/rubert-base-cased',
@@ -53,6 +54,14 @@ class BertClassifier:
             deterministic=True,
             **self._accelerator_params,
         )
+
+        lr_finder = trainer.tuner.lr_find(self._model)
+        save_fig(
+            self._out_dir / 'lr_tuner.png',
+            False,
+            lr_finder.plot(suggest=True),
+        )
+
         trainer.tune(self._model)
         trainer.fit(self._model)
 
