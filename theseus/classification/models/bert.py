@@ -179,8 +179,8 @@ class BertForClassification(pl.LightningModule):
             self.log(
                 f'{prefix}/name',
                 metric(
-                    predictions,
-                    labels,
+                    predictions.clone().detach().cpu(),
+                    labels.clone().detach().cpu(),
                 ),
             )
 
