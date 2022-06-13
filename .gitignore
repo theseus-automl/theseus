@@ -9,6 +9,10 @@
 
 # Test data
 test_dir/
+research/
+
+# PyTorch checkpoints
+*.ckpt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
