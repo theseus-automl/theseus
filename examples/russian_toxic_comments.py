@@ -1,9 +1,9 @@
 from pathlib import Path
 from sys import argv
 
-from theseus.dataset.text_dataset import TextDataset
 from theseus.accelerator import Accelerator
 from theseus.classification.auto import AutoClassifier
+from theseus.dataset.text_dataset import TextDataset
 
 
 def load_toxic_comments(
