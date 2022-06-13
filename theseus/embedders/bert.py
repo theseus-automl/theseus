@@ -151,7 +151,7 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
             for batch in tqdm(self._make_batches(texts, self._effective_batch_size), total=len(texts) // self._effective_batch_size):
                 embeddings.append(self._encode(batch))
 
-            embeddings = torch.stack(embeddings).detach().cpu().numpy()
+            embeddings = torch.cat(embeddings, dim=0).detach().cpu().numpy()
 
             with open(pickled_path, 'wb') as f:
                 pickle.dump(embeddings, f)
