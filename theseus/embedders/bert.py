@@ -120,7 +120,7 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
         #         raise
         # else:
         #     self._effective_batch_size = 1
-        self._effective_batch_size = 1024
+        self._effective_batch_size = 128
 
     def fit(
         self,
@@ -148,7 +148,7 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
 
             embeddings = []
 
-            for batch in tqdm(self._make_batches(texts, self._effective_batch_size)):
+            for batch in tqdm(self._make_batches(texts, self._effective_batch_size), total=len(texts) // self._effective_batch_size):
                 embeddings.append(self._encode(batch))
 
             embeddings = torch.stack(embeddings).detach().cpu().numpy()
