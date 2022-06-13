@@ -171,7 +171,7 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
 
         with torch.no_grad():
             model_output = self._model(
-                **{key: value.to(self.device) for key, value in encoded_input},
+                **{key: value.to(self.device) for key, value in encoded_input.items()},
                 return_dict=True,
             )
 
