@@ -112,11 +112,11 @@ def make_param_grid(
         return (
             _prepare_agglomerative(False),
             (
-                KMeans,
+                MiniBatchKMeans,
                 MappingProxyType({
                     'n_clusters': _get_kmeans_num_clusters(dataset_size),
                     'max_iter': (500,),
-                    'algorithm': ('lloyd',),
+                    'batch_size': (256 * cpu_count(logical=False),),
                 }),
             ),
         )
