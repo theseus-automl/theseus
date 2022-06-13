@@ -51,6 +51,8 @@ class BertClassifier:
             # auto_scale_batch_size='power',
             # auto_lr_find=True,
             max_epochs=_MAX_EPOCHS,
+            gradient_clip_val=1,
+            gradient_clip_algorithm='norm',
             deterministic=True,
             **self._accelerator_params,
         )
