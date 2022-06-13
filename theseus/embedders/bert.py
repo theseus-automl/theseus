@@ -1,5 +1,3 @@
-import pickle
-from pathlib import Path
 from types import MappingProxyType
 from typing import (
     Any,
@@ -15,7 +13,6 @@ from sklearn.base import (
     TransformerMixin,
 )
 from torch.nn import functional as F  # noqa: WPS111, WPS347, N812
-from tqdm import tqdm
 from transformers import (
     AutoModel,
     AutoTokenizer,
@@ -88,7 +85,7 @@ SBERT_SUPPORTED_LANGS = MappingProxyType({
 })
 
 _CLAMP_MIN = 1e-9
-_BATCH_SIZE_SEARCH_START = 32768
+_BATCH_SIZE_SEARCH_START = 1048576
 
 _logger = setup_logger(__name__)
 
@@ -108,19 +105,18 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
         self._model = AutoModel.from_pretrained(SBERT_SUPPORTED_LANGS[self.target_lang]).to(self.device)
         self._model.eval()
 
-        # if self.device.type == 'cuda':
-        #     try:
-        #         self._effective_batch_size = auto_scale_batch_size(
-        #             self,
-        #             ['a '.strip() * self._tokenizer.model_max_length for _ in range(_BATCH_SIZE_SEARCH_START)],
-        #             _BATCH_SIZE_SEARCH_START,
-        #         )
-        #     except NotEnoughResourcesError as err:
-        #         _logger.error(err)
-        #         raise
-        # else:
-        #     self._effective_batch_size = 1
-        self._effective_batch_size = 128
+        if self.device.type == 'cuda':
+            try:
+                self._effective_batch_size = auto_scale_batch_size(
+                    self,
+                    ['a '.strip() * self._tokenizer.model_max_length for _ in range(_BATCH_SIZE_SEARCH_START)],
+                    _BATCH_SIZE_SEARCH_START,
+                )
+            except NotEnoughResourcesError as err:
+                _logger.error(err)
+                raise
+        else:
+            self._effective_batch_size = 1
 
     def fit(
         self,
@@ -134,29 +130,18 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
         texts: Union[str, Iterable[str]],
         y: Any = None,
     ) -> torch.Tensor:
-        pickled_path = Path('/home/tkasimov/bert_embeddings.pkl')
+        if isinstance(texts, str):
+            texts = [texts]
 
-        if pickled_path.exists():
-            with open(pickled_path, 'rb') as f:
-                return pickle.load(f)
-        else:
-            if isinstance(texts, str):
-                texts = [texts]
+        if len(texts) <= self._effective_batch_size:
+            return self._encode(texts)
 
-            if len(texts) <= self._effective_batch_size:
-                return self._encode(texts)
+        embeddings = []
 
-            embeddings = []
+        for batch in self._make_batches(texts, self._effective_batch_size):
+            embeddings.append(self._encode(batch))
 
-            for batch in tqdm(self._make_batches(texts, self._effective_batch_size), total=len(texts) // self._effective_batch_size):
-                embeddings.append(self._encode(batch))
-
-            embeddings = torch.cat(embeddings, dim=0).detach().cpu().numpy()
-
-            with open(pickled_path, 'wb') as f:
-                pickle.dump(embeddings, f)
-
-            return embeddings
+        return torch.cat(embeddings, dim=0).detach().cpu().numpy()
 
     def _encode(
         self,
