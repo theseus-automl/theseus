@@ -148,15 +148,15 @@ class EmbeddingsEstimator(ABC):
                 dataset.labels,
             )
 
-            # plot_gs_result(
-            #     grid.cv_results_,
-            #     self._scoring,
-            #     self._out_dir,
-            # )
-            # plot_metrics(
-            #     grid.cv_results_,
-            #     self._out_dir,
-            # )
+            plot_gs_result(
+                grid.cv_results_,
+                self._scoring,
+                self._out_dir,
+            )
+            plot_metrics(
+                grid.cv_results_,
+                self._out_dir,
+            )
 
             result.append(
                 {
@@ -186,12 +186,12 @@ class EmbeddingsEstimator(ABC):
             cv_results_path,
         )
 
-        # if dataset.labels is None:
-        #     plot_clustering_results(
-        #         result[0]['estimator']['emb'].transform(dataset.texts),
-        #         result[0]['estimator']['clf'].labels_,
-        #         self._out_dir / 'result.png',
-        #     )
+        if dataset.labels is None:
+            plot_clustering_results(
+                result[0]['estimator']['emb'].transform(dataset.texts),
+                result[0]['estimator']['clf'].labels_,
+                self._out_dir / 'result.png',
+            )
 
         return (
             result[0]['best_score'],
