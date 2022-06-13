@@ -173,7 +173,7 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
             model_output = self._model(
                 **{key: value.to(self.device) for key, value in encoded_input.items()},
                 return_dict=True,
-            ).detach().cpu()
+            )
 
         embeddings = self._mean_pooling(
             model_output,
@@ -200,11 +200,14 @@ class BertEmbedder(BaseEstimator, TransformerMixin):
         model_output: BaseModelOutput,
         attention_mask: torch.Tensor,
     ) -> torch.Tensor:
+        device = model_output.last_hidden_state.device
+
         token_embeddings = model_output.last_hidden_state
-        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float().to(device)
         clamped = torch.clamp(
             input_mask_expanded.sum(1),
             min=_CLAMP_MIN,
+
         )
 
         return torch.sum(token_embeddings * input_mask_expanded, 1) / clamped
