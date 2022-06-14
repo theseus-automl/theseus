@@ -42,10 +42,11 @@ class BertForClassification(pl.LightningModule):
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
+        self._num_labels = num_labels
 
         self._model = BertForSequenceClassification.from_pretrained(
             model_name_or_path,
-            num_labels=num_labels,
+            num_labels=self._num_labels,
         )
         self._model.classifier.weight.data.normal_(
             mean=0.0,
@@ -201,13 +202,14 @@ class BertForClassification(pl.LightningModule):
         for metric in self.metrics[prefix].values():
             metric.reset()
 
-    @staticmethod
-    def _make_metrics() -> Dict[str, Metric]:
+    def _make_metrics(
+        self,
+    ) -> Dict[str, Metric]:
         return {
-            'accuracy': Accuracy(average='weighted'),
-            'f1': F1Score(average='weighted'),
-            'precision': Precision(average='weighted'),
-            'recall': Recall(average='weighted'),
+            'accuracy': Accuracy(average='weighted', num_classes=self._num_labels),
+            'f1': F1Score(average='weighted', num_classes=self._num_labels),
+            'precision': Precision(average='weighted', num_classes=self._num_labels),
+            'recall': Recall(average='weighted', num_classes=self._num_labels),
         }
 
     def _collate_fn(
