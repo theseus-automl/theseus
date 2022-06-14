@@ -169,6 +169,12 @@ class AutoClassifier(AutoEstimator):
                 self._accelerator,
             )
             start = timer()
-            score = clf.fit(dataset)
+            score, metrics = clf.fit(dataset)
             _logger.info(f'BERT took: {timer() - start} seconds')
-            _logger.info(f'best F1 score with BERT classifier: {score:.4f}')
+            self._log_score(
+                _logger,
+                score,
+                metrics,
+                'BERT classifier',
+                'F1',
+            )
