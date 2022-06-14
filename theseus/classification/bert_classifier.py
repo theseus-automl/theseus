@@ -16,7 +16,7 @@ _SUPPORTED_LANGS = MappingProxyType({
     LanguageCode.RUSSIAN: 'DeepPavlov/rubert-base-cased',
 })
 
-_MAX_EPOCHS = 15
+_MAX_EPOCHS = 5
 
 
 class BertClassifier:
@@ -55,6 +55,8 @@ class BertClassifier:
             gradient_clip_val=1,
             gradient_clip_algorithm='norm',
             deterministic=True,
+            precision=16,
+            accumulate_grad_batches=1000,
             **self._accelerator_params,
         )
 
