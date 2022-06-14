@@ -113,7 +113,7 @@ class BertForClassification(pl.LightningModule):
         loss = F.cross_entropy(
             logits,
             labels,
-            weight=self._class_weights,
+            weight=torch.tensor(self._class_weights).to(logits.device),
         )
         predictions = logits.argmax(axis=1)
 
