@@ -4,6 +4,7 @@ from types import MappingProxyType
 
 import pytorch_lightning as pl
 
+from theseus._inference import gc_with_cuda
 from theseus.accelerator import Accelerator
 from theseus.classification.models.bert import BertForClassification
 from theseus.dataset.text_dataset import TextDataset
@@ -57,19 +58,21 @@ class BertClassifier:
             **self._accelerator_params,
         )
 
-        trainer.tuner.scale_batch_size(self._model)
         lr_finder = trainer.tuner.lr_find(
             self._model,
             min_lr=1e-8,
-            max_lr=1e-5,
+            max_lr=5e-5,
         )
         save_fig(
             self._out_dir / 'lr_tuner.png',
             False,
             lr_finder.plot(suggest=True),
         )
+        trainer.tuner.scale_batch_size(self._model)
 
-        print(self._model.batch_size)
+        gc_with_cuda()
+        trainer.reset_train_dataloader(self._model)
+        trainer.reset_val_dataloader(self._model)
 
         trainer.fit(self._model)
 
