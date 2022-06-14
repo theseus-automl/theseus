@@ -128,11 +128,11 @@ class BertForClassification(pl.LightningModule):
 
         return loss
 
-    def training_epoch_end(
-        self,
-        outputs: SequenceClassifierOutput,
-    ) -> None:
-        self._reset_metrics('train')
+    # def training_epoch_end(
+    #     self,
+    #     outputs: SequenceClassifierOutput,
+    # ) -> None:
+    #     self._reset_metrics('train')
 
     def validation_step(
         self,
@@ -151,11 +151,11 @@ class BertForClassification(pl.LightningModule):
             'val',
         )
 
-    def validation_epoch_end(
-        self,
-        outputs: SequenceClassifierOutput,
-    ) -> None:
-        self._reset_metrics('val')
+    # def validation_epoch_end(
+    #     self,
+    #     outputs: SequenceClassifierOutput,
+    # ) -> None:
+    #     self._reset_metrics('val')
 
     def train_dataloader(
         self,
@@ -185,9 +185,9 @@ class BertForClassification(pl.LightningModule):
         labels: torch.Tensor,
         prefix: str,
     ) -> None:
-        for metric in self.metrics[prefix].values():
+        for name, metric in self.metrics[prefix].items():
             self.log(
-                f'{prefix}/name',
+                f'{prefix}/{name}',
                 metric(
                     predictions.clone().detach().cpu(),
                     labels.clone().detach().cpu(),
