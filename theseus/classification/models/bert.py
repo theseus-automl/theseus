@@ -196,8 +196,8 @@ class BertForClassification(pl.LightningModule):
     ) -> None:
         for metric in self.metrics[prefix].values():
             metric.update(
-                predictions,
-                labels,
+                predictions.clone().detach().cpu(),
+                labels.clone().detach().cpu(),
             )
             # self.log(
             #     f'{prefix}/{name}',
