@@ -47,6 +47,14 @@ class BertForClassification(pl.LightningModule):
             model_name_or_path,
             num_labels=num_labels,
         )
+        self._model.classifier.weight.data.normal_(
+            mean=0.0,
+            std=0.02,
+        )
+        self._model.classifier.weight.requires_grad = True
+        self._model.classifier.bias.data.zero_()
+        self._model.classifier.bias.requires_grad = True
+
         self._tokenizer = BertTokenizer.from_pretrained(model_name_or_path)
 
         self.learning_rate = _START_LR
