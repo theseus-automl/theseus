@@ -129,11 +129,15 @@ class BertForClassification(pl.LightningModule):
 
         return loss
 
-    # def training_epoch_end(
-    #     self,
-    #     outputs: SequenceClassifierOutput,
-    # ) -> None:
-    #     self._reset_metrics('train')
+    def training_epoch_end(
+        self,
+        outputs: SequenceClassifierOutput,
+    ) -> None:
+        for name, metric in self.metrics['train'].items():
+            self.log(
+                f'train/{name}',
+                metric.compute().item(),
+            )
 
     def validation_step(
         self,
@@ -152,11 +156,15 @@ class BertForClassification(pl.LightningModule):
             'val',
         )
 
-    # def validation_epoch_end(
-    #     self,
-    #     outputs: SequenceClassifierOutput,
-    # ) -> None:
-    #     self._reset_metrics('val')
+    def validation_epoch_end(
+        self,
+        outputs: SequenceClassifierOutput,
+    ) -> None:
+        for name, metric in self.metrics['val'].items():
+            self.log(
+                f'train/{name}',
+                metric.compute().item(),
+            )
 
     def train_dataloader(
         self,
@@ -186,14 +194,18 @@ class BertForClassification(pl.LightningModule):
         labels: torch.Tensor,
         prefix: str,
     ) -> None:
-        for name, metric in self.metrics[prefix].items():
-            self.log(
-                f'{prefix}/{name}',
-                metric(
-                    predictions.clone().detach().cpu(),
-                    labels.clone().detach().cpu(),
-                ),
+        for metric in self.metrics[prefix].values():
+            metric.update(
+                predictions,
+                labels,
             )
+            # self.log(
+            #     f'{prefix}/{name}',
+            #     metric(
+            #         predictions.clone().detach().cpu(),
+            #         labels.clone().detach().cpu(),
+            #     ),
+            # )
 
     def _reset_metrics(
         self,
