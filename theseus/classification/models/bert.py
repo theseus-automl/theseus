@@ -204,10 +204,10 @@ class BertForClassification(pl.LightningModule):
     @staticmethod
     def _make_metrics() -> Dict[str, Metric]:
         return {
-            'accuracy': Accuracy(),
-            'f1': F1Score(),
-            'precision': Precision(),
-            'recall': Recall(),
+            'accuracy': Accuracy(average='weighted'),
+            'f1': F1Score(average='weighted'),
+            'precision': Precision(average='weighted'),
+            'recall': Recall(average='weighted'),
         }
 
     def _collate_fn(
