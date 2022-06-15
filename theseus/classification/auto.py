@@ -169,12 +169,23 @@ class AutoClassifier(AutoEstimator):
                 self._accelerator,
             )
             start = timer()
-            score, metrics = clf.fit(dataset)
+            train_score, train_metrics, val_score, val_metrics = clf.fit(dataset)
             _logger.info(f'BERT took: {timer() - start} seconds')
+
+            _logger.info('TRAIN METRICS')
             self._log_score(
                 _logger,
-                score,
-                metrics,
+                train_score,
+                train_metrics,
+                'BERT classifier',
+                'F1',
+            )
+
+            _logger.info('VAL METRICS')
+            self._log_score(
+                _logger,
+                val_score,
+                val_metrics,
                 'BERT classifier',
                 'F1',
             )
