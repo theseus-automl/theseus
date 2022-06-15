@@ -100,14 +100,14 @@ class _SimilaritySampler(_Sampler, ABC):
         self,
         dataset: TextDataset,
     ) -> TextDataset:
-        df, counts, target_samples = _prepare(
+        df, counts, target_samples, major_class_samples = _prepare(
             dataset.texts,
             dataset.labels,
             self._strategy,
         )
 
         for label, n_samples in counts.items():
-            if n_samples != target_samples:
+            if n_samples != major_class_samples:
                 index = df[df['labels'] == label].index
                 encoded = self._encode(df.loc[index]['texts'].tolist())
                 cosine = self._cosine_similarity(encoded)

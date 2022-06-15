@@ -1,4 +1,3 @@
-import gc
 from typing import (
     List,
     Type,
@@ -40,14 +39,14 @@ class AugmentationOverSampler:
         self,
         dataset: TextDataset,
     ) -> TextDataset:
-        df, counts, target_samples = _prepare(
+        df, counts, target_samples, major_class_samples = _prepare(
             dataset.texts,
             dataset.labels,
             'over',
         )
 
         for label, n_samples in counts.items():
-            if n_samples != target_samples:
+            if n_samples != major_class_samples:
                 base = df[df['labels'] == label].sample(
                     n=abs(n_samples - target_samples),
                     replace=False,
@@ -63,9 +62,8 @@ class AugmentationOverSampler:
                     for text in chunk:
                         augmented.append(model(text))
 
-                    del model  # noqa: WPS420
-                    gc.collect()
-                    torch.cuda.empty_cache()
+                    model.free()
+                    del model
 
                 df = pd.concat(
                     [

@@ -18,14 +18,14 @@ class _RandomSampler(_Sampler, ABC):
         self,
         dataset: TextDataset,
     ) -> TextDataset:
-        df, counts, target_samples = _prepare(
+        df, counts, target_samples, major_class_samples = _prepare(
             dataset.texts,
             dataset.labels,
             self._strategy,
         )
 
         for label, n_samples in counts.items():
-            if n_samples != target_samples:
+            if n_samples != major_class_samples:
                 df = self._update(
                     df,
                     abs(n_samples - target_samples),
