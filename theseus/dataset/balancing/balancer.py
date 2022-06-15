@@ -1,6 +1,8 @@
 from copy import deepcopy
+from typing import Optional
 
 import numpy as np
+import torch
 from sklearn.utils.class_weight import compute_class_weight
 
 from theseus.dataset.balancing.augmentation import AugmentationOverSampler
@@ -21,6 +23,7 @@ from theseus.dataset.text_dataset import TextDataset
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
 from theseus.log import setup_logger
+from theseus.utils import get_args_names
 
 _RANDOM_THRESHOLD = 0.05
 _SIMILARITY_THRESHOLD = 0.1
@@ -34,9 +37,11 @@ class DatasetBalancer:
         self,
         target_lang: LanguageCode,
         ignore_imbalance: bool = False,
+        device: Optional[torch.device] = None,
     ) -> None:
         self._target_lang = target_lang
         self._ignore_imbalance = ignore_imbalance
+        self._device = device
 
     def __call__(
         self,
@@ -63,20 +68,20 @@ class DatasetBalancer:
             over_dev,
         )
 
-        if sampler is None:
-            dataset = deepcopy(dataset)
-            classes = np.unique(dataset.labels)
-            weights = compute_class_weight(
-                class_weight='balanced',
-                classes=classes,
-                y=dataset.labels,
-            )
-            dataset.class_weights = {}
-
-            for cls, weight in zip(classes, weights):
-                dataset.class_weights[cls] = weight
-        else:
+        if sampler is not None:
             dataset = sampler(dataset)
+
+        dataset = deepcopy(dataset)
+        classes = np.unique(dataset.labels)
+        weights = compute_class_weight(
+            class_weight='balanced',
+            classes=classes,
+            y=dataset.labels,
+        )
+        dataset.class_weights = {}
+
+        for cls, weight in zip(classes, weights):
+            dataset.class_weights[cls] = weight
 
         return dataset
 
@@ -103,8 +108,16 @@ class DatasetBalancer:
             sampler_cls = AugmentationOverSampler
 
         if sampler_cls is not None:
+            if 'device' in get_args_names(sampler_cls.__init__) and self._device is not None:
+                kwargs = {'device': self._device}
+            else:
+                kwargs = {}
+
             try:
-                return sampler_cls(self._target_lang)
+                return sampler_cls(
+                    self._target_lang,
+                    **kwargs,
+                )
             except UnsupportedLanguageError:
                 _logger.error(
                     f'{sampler_cls} is unavailable for language {self._target_lang}, so the class weight will be used',
