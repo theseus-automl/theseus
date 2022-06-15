@@ -2,6 +2,8 @@ from pathlib import Path
 from timeit import default_timer as timer
 from typing import Optional
 
+import torch
+
 from theseus.abc.auto_estimator import AutoEstimator
 from theseus.accelerator import Accelerator
 from theseus.classification.bert_classifier import BertClassifier
@@ -66,6 +68,7 @@ class AutoClassifier(AutoEstimator):
         balancer = DatasetBalancer(
             self._target_lang,
             self._ignore_imbalance,
+            device=self._pick_device_for_balancing(),
         )
         start = timer()
         dataset = balancer(dataset)
@@ -189,3 +192,11 @@ class AutoClassifier(AutoEstimator):
                 'BERT classifier',
                 'F1',
             )
+
+    def _pick_device_for_balancing(
+        self,
+    ) -> Optional[torch.device]:
+        try:
+            return self._accelerator.select_single_gpu()
+        except DeviceError:
+            return None

@@ -1,7 +1,9 @@
-import pickle
 from pathlib import Path
 from types import MappingProxyType
-from typing import Dict, Tuple
+from typing import (
+    Dict,
+    Tuple,
+)
 
 import pytorch_lightning as pl
 
