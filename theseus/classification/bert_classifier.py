@@ -1,6 +1,7 @@
 import pickle
 from pathlib import Path
 from types import MappingProxyType
+from typing import Dict, Tuple
 
 import pytorch_lightning as pl
 
@@ -16,7 +17,7 @@ _SUPPORTED_LANGS = MappingProxyType({
     LanguageCode.RUSSIAN: 'DeepPavlov/rubert-base-cased',
 })
 
-_MAX_EPOCHS = 5
+_MAX_EPOCHS = 1
 
 
 class BertClassifier:
@@ -40,7 +41,7 @@ class BertClassifier:
     def fit(
         self,
         dataset: TextDataset,
-    ) -> float:
+    ) -> Tuple[float, Dict[str, float], float, Dict[str, float]]:
         self._model.set_data(dataset)
 
         logger = pl.loggers.TensorBoardLogger(
@@ -49,42 +50,42 @@ class BertClassifier:
         )
         trainer = pl.Trainer(
             logger=logger,
-            # auto_scale_batch_size='power',
-            # auto_lr_find=True,
             max_epochs=_MAX_EPOCHS,
-            gradient_clip_val=1,
+            gradient_clip_val=2,
             gradient_clip_algorithm='norm',
             deterministic=True,
             precision=16,
-            accumulate_grad_batches=1000,
+            accumulate_grad_batches=2048,
+            log_every_n_steps=8,
             **self._accelerator_params,
         )
 
+        # self._model.batch_size = 8
+        # self._model.learning_rate = 1e-4
+
         lr_finder = trainer.tuner.lr_find(
-            self._model,
-            min_lr=1e-8,
-            max_lr=5e-5,
+           self._model,
+           min_lr=1e-8,
+           max_lr=1e-3,
         )
         save_fig(
-            self._out_dir / 'lr_tuner.png',
-            False,
-            lr_finder.plot(suggest=True),
+           self._out_dir / 'lr_tuner.png',
+           False,
+           lr_finder.plot(suggest=True),
         )
         trainer.tuner.scale_batch_size(self._model)
-
         gc_with_cuda()
+
         trainer.reset_train_dataloader(self._model)
         trainer.reset_val_dataloader(self._model)
-
         trainer.fit(self._model)
 
-        try:
-            with open(self._out_dir / 'metrics', 'wb') as f:
-                pickle.dump(
-                    self._model.metrics,
-                    f,
-                )
-        except Exception:
-            print('unable to pickle metrics')
+        train_metrics = {name: metric.compute().item() for name, metric in self._model.metrics['train'].items()}
+        val_metrics = {name: metric.compute().item() for name, metric in self._model.metrics['val'].items()}
 
-        return self._model.metrics['val']['f1'].compute().item()
+        return (
+            train_metrics['f1'],
+            train_metrics,
+            val_metrics['f1'],
+            val_metrics,
+        )
