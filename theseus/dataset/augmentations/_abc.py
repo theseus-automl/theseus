@@ -7,6 +7,7 @@ from typing import Mapping
 import torch
 from transformers import pipeline
 
+from theseus._inference import gc_with_cuda
 from theseus.dataset.augmentations._models import FILL_MASK_MODELS
 from theseus.exceptions import UnsupportedLanguageError
 from theseus.lang_code import LanguageCode
@@ -36,6 +37,12 @@ class AbstractAugmenter(ABC):
         text: str,
     ) -> str:
         raise NotImplementedError
+
+    def free(
+        self,
+    ) -> None:
+        self._pipeline.model.to('cpu')
+        gc_with_cuda()
 
 
 class FillMaskAugmenter(AbstractAugmenter):
