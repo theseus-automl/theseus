@@ -113,7 +113,7 @@ class BertForClassification(pl.LightningModule):
         loss = F.cross_entropy(
             logits,
             labels,
-            weight=torch.FloatTensor(self._class_weights).to(logits.device),
+            weight=torch.FloatTensor(self._class_weights).to(logits.device) if self._class_weights is not None else None,
         )
         predictions = logits.argmax(axis=1)
 
@@ -146,7 +146,11 @@ class BertForClassification(pl.LightningModule):
     ) -> None:
         labels = batch.pop('Class')
         logits = self._model(**batch).logits
-        loss = F.cross_entropy(logits, labels, weight=torch.FloatTensor(self._class_weights).to(logits.device))
+        loss = F.cross_entropy(
+            logits,
+            labels,
+            weight=torch.FloatTensor(self._class_weights).to(logits.device) if self._class_weights is not None else None,
+        )
         predictions = logits.argmax(axis=1)
 
         self.log('val/loss', loss.item())
