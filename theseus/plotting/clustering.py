@@ -39,14 +39,6 @@ def plot_clustering_results(
             label=label,
         )
 
-    ax.legend(
-        loc='upper right',
-        bbox_to_anchor=(
-            1.04,
-            1,
-        ),
-    )
-
     save_fig(
         out_path,
         show,
