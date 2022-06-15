@@ -19,7 +19,7 @@ _SUPPORTED_LANGS = MappingProxyType({
     LanguageCode.RUSSIAN: 'DeepPavlov/rubert-base-cased',
 })
 
-_MAX_EPOCHS = 1
+_MAX_EPOCHS = 2
 
 
 class BertClassifier:
@@ -66,9 +66,10 @@ class BertClassifier:
         # self._model.learning_rate = 1e-4
 
         lr_finder = trainer.tuner.lr_find(
-           self._model,
-           min_lr=1e-8,
-           max_lr=1e-3,
+            self._model,
+            min_lr=1e-8,
+            max_lr=1e-3,
+            update_attr=True,
         )
         save_fig(
            self._out_dir / 'lr_tuner.png',
