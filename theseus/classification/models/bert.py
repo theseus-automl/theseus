@@ -86,7 +86,7 @@ class BertForClassification(pl.LightningModule):
             dataset,
             val_indices,
         )
-        self._class_weights = dataset.class_weights
+        self._class_weights = list(dataset.class_weights.values())
 
     def configure_optimizers(
         self,
