@@ -69,6 +69,7 @@ class DatasetBalancer:
         )
 
         if sampler is not None:
+            _logger.info(f'using {type(sampler).__name__} for balancing')
             dataset = sampler(dataset)
 
         dataset = deepcopy(dataset)

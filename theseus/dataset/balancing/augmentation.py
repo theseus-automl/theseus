@@ -5,6 +5,7 @@ from typing import (
 
 import pandas as pd
 import torch
+from tqdm import tqdm
 
 from theseus.dataset.augmentations._abc import AbstractAugmenter
 from theseus.dataset.augmentations._models import (
@@ -45,7 +46,7 @@ class AugmentationOverSampler:
             'over',
         )
 
-        for label, n_samples in counts.items():
+        for label, n_samples in tqdm(counts.items()):
             if n_samples != major_class_samples:
                 base = df[df['labels'] == label].sample(
                     n=abs(n_samples - target_samples),
@@ -53,7 +54,7 @@ class AugmentationOverSampler:
                 )['texts'].tolist()
                 augmented = []
 
-                for model_cls, chunk in zip(self._augmenters, chunkify(base, len(self._augmenters))):
+                for model_cls, chunk in tqdm(zip(self._augmenters, chunkify(base, len(self._augmenters)))):
                     model = model_cls(
                         target_lang=self._target_lang,
                         device=self._device,
