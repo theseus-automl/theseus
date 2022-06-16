@@ -93,20 +93,16 @@ class DatasetBalancer:
     ) -> SamplerType:
         sampler_cls = None
 
-        if under_dev <= _RANDOM_THRESHOLD:
-            sampler_cls = RandomUnderSampler
-
-        if over_dev <= _RANDOM_THRESHOLD:
-            sampler_cls = RandomOverSampler
-
-        if under_dev <= _SIMILARITY_THRESHOLD:
-            sampler_cls = SimilarityUnderSampler
-
-        if over_dev <= _SIMILARITY_THRESHOLD:
-            sampler_cls = SimilarityOverSampler
-
-        if over_dev <= _AUGMENTATIONS_THRESHOLD:
+        if over_dev >= _AUGMENTATIONS_THRESHOLD:
             sampler_cls = AugmentationOverSampler
+        elif under_dev >= _SIMILARITY_THRESHOLD:
+            sampler_cls = SimilarityUnderSampler
+        elif over_dev >= _SIMILARITY_THRESHOLD:
+            sampler_cls = SimilarityOverSampler
+        elif under_dev >= _RANDOM_THRESHOLD:
+            sampler_cls = RandomUnderSampler
+        elif over_dev >= _RANDOM_THRESHOLD:
+            sampler_cls = RandomOverSampler
 
         if sampler_cls is not None:
             if 'device' in get_args_names(sampler_cls.__init__) and self._device is not None:
