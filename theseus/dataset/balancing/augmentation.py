@@ -50,7 +50,7 @@ class AugmentationOverSampler:
             if n_samples != major_class_samples:
                 base = df[df['labels'] == label].sample(
                     n=abs(n_samples - target_samples),
-                    replace=False,
+                    replace=True,
                 )['texts'].tolist()
                 augmented = []
 
