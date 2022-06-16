@@ -2,11 +2,14 @@ import warnings
 from random import randint
 
 import torch
+import transformers
 
 from theseus.dataset.augmentations._abc import AbstractAugmenter
 from theseus.dataset.augmentations._models import GENERATION_MODELS
 from theseus.lang_code import LanguageCode
 from theseus.validators import Integer
+
+transformers.logging.set_verbosity_error()
 
 
 class GPTAugmenterShortInputWarning(Warning):
