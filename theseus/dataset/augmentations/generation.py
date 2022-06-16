@@ -22,7 +22,7 @@ class GPTAugmenter(AbstractAugmenter):
         target_lang: LanguageCode,
         device: torch.device,
         min_input_len: int = 5,
-        max_sequences: int = 10,
+        max_sequences: int = 1,
     ) -> None:
         super().__init__(
             target_lang,
@@ -40,11 +40,11 @@ class GPTAugmenter(AbstractAugmenter):
     ) -> str:
         input_length = len(text.split())
 
-        if input_length < self._min_input_len:
-            warnings.warn(
-                'Input is too short. Results may be inaccurate',
-                GPTAugmenterShortInputWarning,
-            )
+        # if input_length < self._min_input_len:
+        #     warnings.warn(
+        #         'Input is too short. Results may be inaccurate',
+        #         GPTAugmenterShortInputWarning,
+        #     )
 
         num_new_words = randint(input_length // 2, input_length)
         output = self._pipeline(
