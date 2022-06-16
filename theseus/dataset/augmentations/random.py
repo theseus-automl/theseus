@@ -9,10 +9,14 @@ class RandomReplacementAugmenter(FillMaskAugmenter):
         text: str,
     ) -> str:
         tokens = text.split()
+        range_stop = len(tokens) - 1
+
+        if range_stop <= 1:
+            return text
 
         idx = randint(
             1,
-            len(tokens) - 1,
+            range_stop,
         )
         orig_word = tokens[idx]
         tokens[idx] = self._mask_token
@@ -32,8 +36,12 @@ class RandomInsertionAugmenter(FillMaskAugmenter):
         text: str,
     ) -> str:
         tokens = text.split()
+        range_stop = len(tokens) - 2
 
-        idx = randint(1, len(tokens) - 2)
+        if range_stop <= 1:
+            return text
+
+        idx = randint(1, range_stop)
         masked = ' '.join(tokens[:idx] + [self._mask_token] + tokens[idx:])
         augmented_text = self._pipeline(masked)[0]['sequence']
         return augmented_text.replace(self._cls_token, '').replace(self._sep_token, '').strip()
