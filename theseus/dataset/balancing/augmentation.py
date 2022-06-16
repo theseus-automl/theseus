@@ -46,7 +46,7 @@ class AugmentationOverSampler:
             'over',
         )
 
-        for label, n_samples in tqdm(counts.items()):
+        for label, n_samples in tqdm(counts.items(), desc='Processing classes'):
             if n_samples != major_class_samples:
                 base = df[df['labels'] == label].sample(
                     n=abs(n_samples - target_samples),
@@ -60,7 +60,7 @@ class AugmentationOverSampler:
                         device=self._device,
                     )
 
-                    for text in chunk:
+                    for text in tqdm(chunk, desc='Processing chunk'):
                         augmented.append(model(text))
 
                     model.free()
