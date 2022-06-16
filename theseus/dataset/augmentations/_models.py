@@ -89,6 +89,7 @@ FILL_MASK_MODELS = MappingProxyType({
     LanguageCode.QUECHUA: 'Llamacha/QuBERTa',
     LanguageCode.ALBANIAN: 'macedonizer/al-roberta-base',
     LanguageCode.TOSK_ALBANIAN: 'macedonizer/al-roberta-base',
+    LanguageCode.RUSSIAN: 'sberbank-ai/ruBert-base',
 })
 
 # noinspection SpellCheckingInspection
