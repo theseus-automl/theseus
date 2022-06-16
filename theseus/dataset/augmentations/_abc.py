@@ -28,7 +28,7 @@ class AbstractAugmenter(ABC):
             task,
             model=supported_models[target_lang],
             framework='pt',
-            device_num=device.index,
+            device=device.index,
         )
 
     @abstractmethod
