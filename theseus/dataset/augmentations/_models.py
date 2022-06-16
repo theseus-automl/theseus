@@ -103,7 +103,7 @@ GENERATION_MODELS = MappingProxyType({
     LanguageCode.YUE_CHINESE: 'ckiplab/gpt2-base-chinese',
     LanguageCode.SWEDISH: 'birgermoell/swedish-gpt',
     LanguageCode.FINNISH: 'Finnish-NLP/gpt2-large-finnish',
-    LanguageCode.RUSSIAN: 'sberbank-ai/rugpt3large_based_on_gpt2',
+    LanguageCode.RUSSIAN: 'sberbank-ai/rugpt3small_based_on_gpt2',
     LanguageCode.JAPANESE: 'rinna/japanese-gpt-1b',
     LanguageCode.ARABIC: 'aubmindlab/aragpt2-large',
     LanguageCode.PORTUGUESE: 'pierreguillou/gpt2-small-portuguese',
