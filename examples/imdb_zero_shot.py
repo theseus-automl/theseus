@@ -7,6 +7,7 @@ import pandas as pd
 
 from theseus.accelerator import Accelerator
 from theseus.dataset.text_dataset import TextDataset
+from theseus.plotting.classification import plot_class_distribution
 from theseus.zero_shot.auto import AutoZeroShotClassifier
 
 
@@ -30,13 +31,20 @@ def load_imdb(
 
     _df = pd.DataFrame()
     _df['text'] = _pos + _neg
-    _df['label'] = list(repeat(1, len(_pos))) + list(repeat(0, len(_neg)))
+    _df['label'] = list(repeat('positive', len(_pos))) + list(repeat('negative', len(_neg)))
 
     return _df
 
 
 if __name__ == '__main__':
-    df = load_imdb(Path(argv[1]))
+    df = load_imdb(Path('/Users/tkasimov/Downloads/aclImdb'))
+
+    plot_class_distribution(
+        df['label'],
+        Path('imdb_cd.png'),
+    )
+    input()
+
     base_dir = Path(argv[2])
     batch_size = int(argv[3])
     accelerator = Accelerator(gpus=0)

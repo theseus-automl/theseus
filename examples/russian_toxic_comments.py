@@ -1,9 +1,11 @@
+import pickle
 from pathlib import Path
 from sys import argv
 
 from theseus.accelerator import Accelerator
 from theseus.classification.auto import AutoClassifier
 from theseus.dataset.text_dataset import TextDataset
+from theseus.lang_code import LanguageCode
 
 
 def load_toxic_comments(
@@ -31,16 +33,27 @@ def load_toxic_comments(
 
 
 if __name__ == '__main__':
-    dataset = load_toxic_comments(Path(argv[1]))
-    acc = Accelerator(gpus=0)
-    clf = AutoClassifier(
-        Path(argv[2]),
-        acc,
-        use_fasttext=True,
-        use_tf_idf=True,
-        use_bert=True,
-        tf_idf_n_iter=50,
-        fast_text_n_iter=50,
-        ignore_imbalance=True,
-    )
-    clf.fit(dataset)
+    dataset = load_toxic_comments(Path('/Users/tkasimov/Downloads/dataset.txt'))
+    # with open('../dataset.pkl', 'rb') as f:
+    #     dataset = pickle.load(f)
+    
+    import numpy as np
+    print(np.unique(dataset.le.inverse_transform(dataset.labels), return_counts=True))
+
+    print(len(dataset))
+
+    # acc = Accelerator()
+    # clf = AutoClassifier(
+    #     Path('research/russian-toxic-comments-balanced'),
+    #     acc,
+    #     target_lang=LanguageCode.RUSSIAN,
+    #     use_fasttext=True,
+    #     use_tf_idf=False,
+    #     use_bert=False,
+    #     tf_idf_n_iter=50,
+    #     tf_idf_n_jobs=-1,
+    #     fast_text_n_iter=10,
+    #     fast_text_n_jobs=4,
+    #     ignore_imbalance=True,
+    # )
+    # clf.fit(dataset)
