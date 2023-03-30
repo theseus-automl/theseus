@@ -10,6 +10,8 @@
 # Test data
 test_dir/
 research/
+*.png
+*.pkl
 
 # PyTorch checkpoints
 *.ckpt
