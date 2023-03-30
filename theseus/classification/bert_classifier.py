@@ -62,9 +62,6 @@ class BertClassifier:
             **self._accelerator_params,
         )
 
-        # self._model.batch_size = 8
-        # self._model.learning_rate = 1e-4
-
         lr_finder = trainer.tuner.lr_find(
             self._model,
             min_lr=1e-8,

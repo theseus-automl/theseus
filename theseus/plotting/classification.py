@@ -27,35 +27,36 @@ _PARAM_BLACKLIST = frozenset({
 def plot_class_distribution(
     labels: pd.Series,
     out_path: Path,
+    ax,
     show: bool = False,
 ) -> None:
     count = len(labels)
 
-    count_ax = sns.countplot(x=labels)
+    sns.countplot(x=labels, ax=ax)
     plt.setp(
-        count_ax.get_xticklabels(),
+        ax.get_xticklabels(),
         rotation=Defaults.rotation,
     )
-    count_ax.set(
-        xlabel='Classes',
+    ax.set(
+        xlabel='',
         ylabel='Count',
         title='Classes distribution',
     )
 
-    freq_ax = count_ax.twinx()
+    freq_ax = ax.twinx()
     freq_ax.set_xlabel('Frequency [%]')
 
-    count_ax.yaxis.tick_left()
-    count_ax.yaxis.set_label_position('left')
+    ax.yaxis.tick_left()
+    ax.yaxis.set_label_position('left')
     freq_ax.yaxis.tick_right()
     freq_ax.yaxis.set_label_position('right')
 
-    for patch in count_ax.patches:
+    for patch in ax.patches:
         x = patch.get_bbox().get_points()[:, 0].mean()  # noqa: WPS111
         y = patch.get_bbox().get_points()[1, 1]  # noqa: WPS111
         coords = (x, y)
 
-        count_ax.annotate(
+        ax.annotate(
             f'{100 * y / count:.1f}%',
             coords,
             ha='center',
@@ -63,14 +64,14 @@ def plot_class_distribution(
         )
 
     freq_ax.set_ylim(0, 100)
-    count_ax.set_ylim(0, count)
+    ax.set_ylim(0, count)
 
     freq_ax.grid(None)
 
-    save_fig(
-        out_path,
-        show,
-    )
+    # save_fig(
+    #     out_path,
+    #     show,
+    # )
 
 
 def plot_gs_result(
